@@ -131,7 +131,9 @@ if ( isset($_GET['action']) && "overnight" == $_GET['action'] && $_GET['pwd'] ==
 	//$l = mysql_query($query_select_pl_data) or die(mysql_error());
 	$l=$posql->query($query_select_pl_data); 
 	// Alle spelers afgaan
-	while ($li = mysql_fetch_assoc($l))
+	
+	//while ($li = mysql_fetch_assoc($l))
+	while ($li = $l->fetch('assoc'))
 	{
 		// Player array uitpakken
 		$pi = unserialize(stripslashes($li['player']));
@@ -231,8 +233,8 @@ if ( ( !isset($_SESSION['player']) || !isset($_SESSION['uid']) ) || isset($_GET[
 					
 					//$result = mysql_query("SELECT * FROM dopewars WHERE name='".$name."';");
 					$result=$posql->query("SELECT * FROM dopewars WHERE name='".$name."';");
-					
-					
+					$result_assoc=$result->fetch('assoc'); //added by j 
+					print_r($result_assoc); //debug
 					if ( $new )
 					{
 					//if (mysql_num_rows($result))
@@ -275,8 +277,8 @@ if ( ( !isset($_SESSION['player']) || !isset($_SESSION['uid']) ) || isset($_GET[
 							
 							if ( $posql->insert('dopewars', $data) )
 							{
-								session_register("uid");
-								session_register("player");
+								//session_register("uid");
+								//session_register("player");
 								$_SESSION['uid'] = $name;
 								$_SESSION['player'] = $player;
 							}
@@ -290,16 +292,19 @@ if ( ( !isset($_SESSION['player']) || !isset($_SESSION['uid']) ) || isset($_GET[
 						if ( !$result->rowCount )
 						{
 							echo $error = "No such user";
-						}
-						else if ( md5(mysql_result($result,0,'password')) != md5($password) )
+						} 
+						//else if ( md5(mysql_result($result,0,'password')) != md5($password) )
+						//else if ( md5($posql->query($result,0,'password')) != md5($password) )  //#### DOES NOT WORK !!!!!!jon check if it works ????
+						//$result_assoc['password']
+						else if ( md5($result_assoc['password']) != md5($password) )  //#### DOES NOT WORK !!!!!!jon check if it works ????
 						{
 							echo $error = "Invalid password";
 						}
 						else
 						{
 							check_max( );
-							session_register("uid");
-							session_register("player");
+							//session_register("uid");
+							//session_register("player");
 							$_SESSION['uid']	= mysql_result($result,0,'name');
 							$_SESSION['player']	= unserialize(mysql_result($result,0,'player'));
 							// if ( !isset($_SESSION['player']['life']) ) $_SESSION['player']['life'] = 100;
@@ -361,9 +366,13 @@ if ( isset($_SESSION['player']['opponent']) && $_SESSION['player']['opponent'] )
 	// prevent deadlock by selecting the opponent as well
 
 	$qry = "SELECT * FROM dopewars WHERE name in ('".$uid."','".$player['opponent']."');";
-	$listed = mysql_query($qry);
-	$result[0] = mysql_result($listed,0);
-	$result[1] = mysql_result($listed,1);
+	//$listed = mysql_query($qry);
+	//$result[0] = mysql_result($listed,0);
+	//$result[1] = mysql_result($listed,1);
+	$listed = $posql->query($qry);
+	$listed_assoc=$listed->fetch('assoc'); //added by j  
+	$result[0] = $listed_assoc[0]; //jon ?????????????
+	$result[1] = $listed_assoc[1]; //jon ????????????	
 	if ($result[0]['name'] == $uid)
 	{
 		$player = unserialize(stripslashes($result[0]['player']));
@@ -387,8 +396,10 @@ if ( isset($_SESSION['player']['opponent']) && $_SESSION['player']['opponent'] )
 else
 {
 	$qry = "SELECT * FROM dopewars WHERE name='".$_SESSION['uid']."' FOR UPDATE;";
-	$q = mysql_query($qry) or die(mysql_error());
-	$result = mysql_fetch_assoc($q);
+	//$q = mysql_query($qry) or die(mysql_error());
+	$q = $posql->query($qry) or die("Error in - ".$qry);
+	//$result = mysql_fetch_assoc($q);
+	$result=$q->fetch('assoc'); //added by j  
 	$player = unserialize(stripslashes($result['player']));
 	$pass = $result['password'];
 }
