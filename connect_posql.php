@@ -1,5 +1,10 @@
 <?php
 
+$posql = new Posql("posql_dopewars_db.php");
+  if ($posql->isError()) {
+    die($posql->lastError());
+  } 
+
 //++++++++++++++++++++++++++++JON DEMO posql ++++++++++++++++++++++++++++++++
 /* 
 $posql = new Posql("posql_shoplist_db");
