@@ -1,6 +1,6 @@
 <?php
 // PosqlAdmin
-// ぽすきゅーえるあどみん
+// Posql (posukyu-eru) admin
 posql_admin_run();
 
 /**
@@ -16,11 +16,11 @@ posql_admin_run();
  * PHP version 4.3+ or 5+
  *
  * @package   Posql
- * @author    polygon planet <polygon.planet@gmail.com>
+ * @author    polygon planet <polygon_planet@yahoo.co.jp>
  * @link      http://sourceforge.jp/projects/posql/
  * @license   Dual licensed under the MIT and GPL licenses
  * @copyright Copyright (c) 2010 polygon planet
- * @version   $Id: posqladmin.php,v 0.19a 2011/12/13 20:26:17 polygon Exp $
+ * @version   $Id: posqladmin.php,v 0.18 2010/03/28 23:11:38 polygon Exp $
  *---------------------------------------------------------------------------*/
 class PosqlAdmin {
 
@@ -59,14 +59,17 @@ class PosqlAdmin {
   var $helpDocFrameId   = 'posql_help_frame';
   var $projectURL       = 'http://sourceforge.jp/projects/posql/';
 
+  function PosqlAdmin(){
+    $this->init();
+  }
+
 
   function init(){
-    defined('E_STRICT') or define('E_STRICT', 2048);
     if ($this->debug) {
+      defined('E_STRICT') or define('E_STRICT', 2048);
       error_reporting(E_ALL | E_STRICT);
     } else {
-      //error_reporting(E_ALL & ~E_NOTICE & ~E_STRICT);
-      error_reporting(1023);
+      error_reporting(E_ALL & ~E_NOTICE);
     }
     if (!@ini_get('safe_mode')) {
       if ($this->timeLimit > ((int)(@ini_get('max_execution_time')))) {
@@ -133,8 +136,8 @@ class PosqlAdmin {
                 break;
             case 'export':
                 $this->selectDBAction = 'export';
-                $this->write('head', 'title', 'menu',
-                             'selectdb', 'export', 'foot');
+                $this->write('head','title','menu',
+                             'selectdb','export','foot');
                 break;
             case 'config':
                 $this->write('head', 'title', 'menu', 'config', 'foot');
@@ -164,29 +167,28 @@ class PosqlAdmin {
             case 'result':
                 $result = $this->getPost('managesearch_result');
                 if ($result == null || !(@is_file($result))) {
-                  $this->setStatus('無効なファイルです('
-                                         . $result . ')', true);
+                  $this->setStatus('Invalid file(' . $result . ')', true);
                 } else {
                   $tmp = $this->db->getPath();
                   $this->db->setPath($result);
                   if (!$this->db->isDatabase()) {
-                    $this->setStatus('有効なデータベースではありません('
-                                  . $result . ')', true);
+                    $this->setStatus('Invalid database format('
+                                      . $result . ')', true);
                   } else {
                     $list = $this->mem->loadAsPrivate('manage.list');
                     if (!is_array($list)) {
                       $list = array();
                     }
                     if (in_array($result, $list)) {
-                      $this->setStatus('すでに登録されています', true);
+                      $this->setStatus('It has already been registered', true);
                     } else {
                       $list[] = $result;
                       if ($this->mem->saveAsPrivate('manage.list', $list)) {
-                        $this->setStatus('管理リストに追加しました('
-                                                     . $result . ')');
+                        $this->setStatus('It added to the management list('
+                                                      . $result . ')');
                       } else {
-                        $this->setStatus('管理リスト追加に失敗! ('
-                                                   . $result . ')', true);
+                        $this->setStatus('Failed to add the management list!('
+                                                      . $result . ')', true);
                       }
                     }
                   }
@@ -247,66 +249,66 @@ class PosqlAdmin {
           switch ($m) {
             case 'save':
                 $e = false;
-                if ($posql != null 
-                 && !$this->mem->saveAsPrivate('posql', $posql)) 
+                if ($posql != null
+                 && !$this->mem->saveAsPrivate('posql', $posql))
                 {
-                  $e = $this->setStatus('"Posql ファイルパス"'
-                                      . ' の保存に失敗!', true);
+                  $e = $this->setStatus('"Posql class library path"'
+                                      . ' Failed to save!', true);
                 }
-                if (!$this->isEnablePosqlFile($posql)) 
+                if (!$this->isEnablePosqlFile($posql))
                 {
-                  $e = $this->setStatus('"Posql ファイルパス"'
-                                      . ' 無効なファイルです!', true);
+                  $e = $this->setStatus('"Posql class library path"'
+                                      . ' Invalid file source!', true);
                 }
                 if (!$e) {
                   $this->hideWarnMsg = true;
                 }
-                if ($mode != null 
-                 && !$this->mem->saveAsPrivate('mode', $mode)) 
+                if ($mode != null
+                 && !$this->mem->saveAsPrivate('mode', $mode))
                 {
-                  $e = $this->setStatus('"SQL Engine" の保存に失敗!', true);
+                  $e = $this->setStatus('"SQL Engine" Failed to save!', true);
                 }
                 if ($help != null) {
                   if (!$this->isReadable($help)) {
                     $e = $this->setStatus('"Help"'
-                                      .  ' ファイルが読み込めません', true);
+                                      .  ' Cannot read the file!', true);
                   }
                   else if (!$this->mem->saveAsPrivate('help', $help))
                   {
-                    $e = $this->setStatus('"Help" の保存に失敗!', true);
+                    $e = $this->setStatus('"Help" Failed to save!', true);
                   }
                 }
                 else if ($help == null
                       && $this->mem->countAsPrivate('help')
-                      && !$this->mem->deleteAsPrivate('help')) 
+                      && !$this->mem->deleteAsPrivate('help'))
                 {
-                  $e = $this->setStatus('"Help" の削除に失敗!', true);
+                  $e = $this->setStatus('"Help" Failed to delete!', true);
                 }
-                if (!$this->mem->saveAsPrivate('dl', $dl)) 
+                if (!$this->mem->saveAsPrivate('dl', $dl))
                 {
-                  $e = $this->setStatus('"Download" の保存に失敗!', true);
+                  $e = $this->setStatus('"Download" Failed to save!', true);
                 }
-                if ($css != null 
-                 && !$this->mem->saveAsPrivate('css', $css)) 
+                if ($css != null
+                 && !$this->mem->saveAsPrivate('css', $css))
                 {
-                  $e = $this->setStatus('"CSS" の保存に失敗!', true);
+                  $e = $this->setStatus('"CSS" Failed to save!', true);
                 }
                 else if ($css == null
                       && $this->mem->countAsPrivate('css')
-                      && !$this->mem->deleteAsPrivate('css')) 
+                      && !$this->mem->deleteAsPrivate('css'))
                 {
-                  $e = $this->setStatus('"CSS" の削除に失敗!', true);
+                  $e = $this->setStatus('"CSS" Failed to delete!', true);
                 }
-                if ($js != null 
-                 && !$this->mem->saveAsPrivate('js', $js)) 
+                if ($js != null
+                 && !$this->mem->saveAsPrivate('js', $js))
                 {
-                  $e = $this->setStatus('"JavaScript" の保存に失敗!', true);
+                  $e = $this->setStatus('"JavaScript" Failed to save!', true);
                 }
                 else if ($js == null
                       && $this->mem->countAsPrivate('js')
-                      && !$this->mem->deleteAsPrivate('js')) 
+                      && !$this->mem->deleteAsPrivate('js'))
                 {
-                  $e = $this->setStatus('"JavaScript" の削除に失敗!', true);
+                  $e = $this->setStatus('"JavaScript" Failed to delete!', true);
                 }
                 $new_id = $this->encrypt($id);
                 $new_ps = $this->encrypt($ps);
@@ -316,16 +318,16 @@ class PosqlAdmin {
                       'ps' => $new_ps
                     )
                   )
-                ) 
+                )
                 {
                   $this->isLogin = $this->generateKey($new_id, $new_ps);
                 }
                 else {
-                  $e = $this->setStatus('アカウント情報の保存に失敗!', true);
+                  $e = $this->setStatus('"Account" failed to save!', true);
                 }
                 unset($new_id, $new_ps);
                 if (!$e) {
-                  $this->setStatus('"設定" を保存しました ('
+                  $this->setStatus('"Config" saved ('
                                         . $this->now() . ')');
                 }
                 break;
@@ -363,8 +365,8 @@ class PosqlAdmin {
 
   function includePosql(){
     static $inited = false, $warned = false;
-    $warn_msg = '"posql.php" が不正なファイルです!';
-    $conf_msg = '「設定」から "posql.php" のファイルパスを設定してください';
+    $warn_msg = '"posql.php" Invalid file source!';
+    $conf_msg = 'Set your "posql.php" file path at Config menu.';
     $class = 'posql_open_failed';
     if (!$inited) {
       $inited = true;
@@ -381,11 +383,13 @@ class PosqlAdmin {
         }
       } else {
         require_once $this->posqlPath;
-        $this->db = & new Posql();
+        //$this->db = & new Posql(); //deprecated
+		$this->db =  new Posql();
       }
     }
     if (!is_object($this->db)) {
-      $this->db = & new Posql_Dummy_Object;
+      //$this->db = & new Posql_Dummy_Object;
+	  $this->db =  new Posql_Dummy_Object;
     }
     if ($this->isLogin && !$warned
      && 0 !== strcasecmp(@get_class($this->db), 'Posql')) {
@@ -405,7 +409,7 @@ class PosqlAdmin {
   }
 
   function getVersion(){
-    return '0.19a';
+    return '0.18';
   }
 
   function getCharset(){
@@ -476,7 +480,7 @@ class PosqlAdmin {
   }
 
 
-  function getValue($var, $key, $default = null, $strict = false){
+  function getValue($var, $key, $default = null){
     $result = null;
     if (is_scalar($key)) {
       if (is_array($var) && isset($var[$key])) {
@@ -485,14 +489,8 @@ class PosqlAdmin {
         $result = $var->{$key};
       }
     }
-    if ($strict) {
-      if ($result === null) {
-        $result = $default;
-      }
-    } else {
-      if ($result == null) {
-        $result = $default;
-      }
+    if ($result == null) {
+      $result = $default;
     }
     return $result;
   }
@@ -676,8 +674,8 @@ class PosqlAdmin {
     $id = $this->getPost('login_id', false);
     $ps = $this->getPost('login_ps', false);
     if (($auth !== false)
-     ||   ($id !== false 
-        && $ps !== false)) 
+     ||   ($id !== false
+        && $ps !== false))
     {
       $act = (array) $this->mem->loadAsPrivate('account');
       $aid = (string) $this->getValue($act, 'id');
@@ -689,7 +687,7 @@ class PosqlAdmin {
       && $this->encrypt($id) === $aid
       && $this->encrypt($ps) === $aps)
       || ($auth !== false
-       && $auth === $key)) 
+       && $auth === $key))
     {
       $this->setLastLogin(!$auth);
       if (!$auth) {
@@ -709,7 +707,7 @@ class PosqlAdmin {
         $count = (int)$count;
       }
       if ($count) {
-        $this->setStatus('認証に失敗!', true);
+        $this->setStatus('Authentication failure!', true);
         $this->setLoginHistory(false);
       }
       $this->loginErrorCount = $this->encodeErrorCount($count + 1);
@@ -789,7 +787,7 @@ class PosqlAdmin {
     }
     if ($do_save) {
       if (count($histories) >= $this->maxLoginHistory) {
-        array_shift($histories);
+        array_pop($histories);
       }
       $histories[] = $history;
       $this->mem->saveAsPrivate('login.history', $histories);
@@ -844,7 +842,7 @@ class PosqlAdmin {
 
   function generateErrorCountKey($left = 'Error', $right = 'Count'){
     $result = strtoupper($this->generateKey($left, $right));
-    $result = strtr($result, '349CF', 'POSQL');
+    $result = strtr($result, '348CE', 'POSQL');
     return $result;
   }
 
@@ -908,265 +906,6 @@ class PosqlAdmin {
     return $result;
   }
 
-
-  function addslashes($string){
-    if (!is_string($string)) {
-      $string = '';
-    } else {
-      if (@ini_get('magic_quotes_sybase')) {
-        $string = strtr($string,
-          array(
-            '\\' => '\\\\',
-            '"'  => '\"',
-            "'"  => "\'",
-            "\0" => '\0'
-          )
-        );
-      } else {
-        $string = addslashes($string);
-      }
-    }
-    return $string;
-  }
-
-
-  function stripslashes($string){
-    if (!is_string($string)) {
-      $string = '';
-    } else {
-      if (@ini_get('magic_quotes_sybase')) {
-        $string = strtr($string,
-          array(
-            '\0' => "\0",
-            "\'" => "'",
-            '\"' => '"',
-            '\\' => '\\\\'
-          )
-        );
-      } else {
-        $string = stripslashes($string);
-      }
-    }
-    return $string;
-  }
-
-
- /**
-  * Checks whether the class exists without triggering __autoload().
-  *
-  * @param   string   the class name of target
-  * @return  boolean  TRUE success and FALSE on error
-  */
-  function existsClass($class) {
-    $result = false;
-    if ($class != null && is_string($class)) {
-      if (version_compare(phpversion(), 5, '>=')) {
-        $result = class_exists($class, false);
-      } else {
-        $result = class_exists($class);
-      }
-    }
-    return $result;
-  }
-
-
- /**
-  * JSON encode a string value by escaping characters as necessary.
-  * This function usage is string only.
-  *
-  * @param  string   subject string
-  * @param  boolean  whether quote string
-  * @return string   encoded string
-  * @access public
-  */
-  function toJSONString($string, $enclose = false) {
-    $result = '';
-    if (is_scalar($string)) {
-      $result = $this->encodeJSON($string);
-      if ($result == null || !is_string($result)) {
-        $result = '';
-      }
-    }
-    $quote = substr($result, 0, 1);
-    if ($quote === '"' && substr($result, -1) === $quote) {
-      if (!$enclose) {
-        $result = substr($result, 1, -1);
-      }
-    } else {
-      if ($enclose) {
-        $result = '"' . $result . '"';
-      }
-    }
-    return $result;
-  }
-
-
- /**
-  * Encodes an arbitrary variable into JSON format.
-  * This function usage like json_encode PHP extension.
-  *
-  * @link  http://php.net/function.json-encode
-  *
-  * @param  mixed  any number, boolean, string, array, or object to be encoded
-  * @return string JSON string representation of input variable
-  */
-  function encodeJSON($var) {
-    static $translates = array(
-      '\\' => '\\\\',
-      "\n" => '\n',
-      "\t" => '\t',
-      "\r" => '\r',
-      "\b" => '\b',
-      "\f" => '\f',
-      '"'  => '\"'
-    );
-    $result = null;
-    if (function_exists('json_encode')) {
-      if (is_float($var) && is_nan($var)) {
-        $result = 'NaN';
-      } else {
-        $result = @json_encode($var);
-      }
-    } else {
-      @(include_once 'Services/JSON.php');
-      $exists = $this->existsClass('Services_JSON');
-      if ($exists) {
-        $js = new Services_JSON();
-        $result = $js->encode($var);
-        if (!is_string($result)) {
-          $result = null;
-        }
-        $js = null;
-        unset($js);
-      } else {
-        switch (true) {
-          case is_null($var):
-          case is_resource($var):
-              $result = 'null';
-              break;
-          case is_bool($var):
-              $result = $var ? 'true' : 'false';
-              break;
-          case is_scalar($var):
-              switch (true) {
-                case is_float($var):
-                    if (is_nan($var)) {
-                      $result = 'NaN';
-                    } else {
-                      $result = floatval(strtr(strval($var), ',', '.'));
-                    }
-                    break;
-                case is_string($var):
-                    $result = '"' . strtr($var, $translates) . '"';
-                    break;
-                default:
-                    $result = $var;
-                    break;
-              }
-              break;
-          default:
-              $is_list = true;
-              $count = count($var);
-              for ($i = 0, reset($var); $i < $count; $i++, next($var)) {
-                if (key($var) !== $i) {
-                  $is_list = false;
-                  break;
-                }
-              }
-              $items = array();
-              if ($is_list) {
-                foreach ($var as $val) {
-                  $items[] = $this->encodeJSON($val);
-                }
-                $result = '[' . implode(',', $items) . ']';
-              } else {
-                foreach ($var as $key => $val) {
-                  $items[] = $this->encodeJSON($key) 
-                           . ':' 
-                           . $this->encodeJSON($val);
-                }
-                $result = '{' . implode(',', $items) . '}';
-              }
-              break;
-        }
-      }
-    }
-    $result = (string)$result;
-    return $result;
-  }
-
-
- /**
-  * Decodes a JSON string into appropriate variable.
-  * This function usage like json_decode PHP extension.
-  *
-  * @link  http://php.net/function.json-decode
-  *
-  * @param  string  JSON-formatted string
-  * @return mixed   any object types corresponding to given JSON input string
-  */
-  function decodeJSON($json) {
-    $result = null;
-    $json = (string)$json;
-    if (function_exists('json_decode')) {
-      $result = @json_decode($json, true);
-    } else {
-      @(include_once 'Services/JSON.php');
-      $exists = $this->existsClass('Services_JSON');
-      if ($exists) {
-        $js = new Services_JSON();
-        $result = $js->decode($json);
-        if (is_object($result)) {
-          $class = strtolower(get_class($result));
-          if (strpos($class, 'error') !== false
-           || strpos($class, 'exception') !== false) {
-            $result = null;
-          }
-        }
-        $js = null;
-        unset($js);
-      } else {
-        $code = '';
-        $quote = false;
-        $length = strlen($json);
-        for ($i = 0; $i < $length; $i++) {
-          if ($quote) {
-            $code .= $json[$i];
-            if ($json[$i] === '"') {
-              $quote = !$quote;
-            }
-          } else {
-            switch ($json[$i]) {
-              case '(':
-              case ')':
-                  $code = 'null';
-                  break 2;
-              case '{':
-              case '[':
-                  $code .= ' array(';
-                  break;
-              case '}':
-              case ']':
-                  $code .= ')';
-                  break;
-              case ':':
-                  $code .= '=>';
-                  break;
-              case '"':
-                  $quote = true;
-              default:
-                  $code .= $json[$i];
-                  break;
-            }
-          }
-        }
-        $result = @eval('return ' . $code . ';');
-      }
-    }
-    return $result;
-  }
-
-
   function setStatus($status, $error = false){
     $this->status[] = $status;
     $this->errors[] = $error;
@@ -1174,9 +913,7 @@ class PosqlAdmin {
   }
 
 
-  function setConfigAsBigInt($varname, $value,
-                             $type = 'number',
-                             $overwrite = false){
+  function setConfigAsBigInt($varname, $value, $type = 'number', $overwrite = false){
     $ini_value = trim(@ini_get($varname));
     if ($ini_value == null) {
       $ini_value = 0;
@@ -1285,7 +1022,7 @@ class PosqlAdmin {
   }
 
   function toByte($value){
-    $bytes = floatval($value);
+    $bytes = $value - 0;
     if (!is_numeric($value)) {
       switch (strtoupper(substr($value, -1))) {
         case 'P': $bytes *= 1024;
@@ -1320,7 +1057,7 @@ class PosqlAdmin {
 
 
   function optimizeDatabase(){
-    static $mask = 
+    static $mask =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
     $result = false;
     $this->optimizeLines = array();
@@ -1483,8 +1220,7 @@ class PosqlAdmin {
       'a3d8e0421a26d7e77ff1db1a3d3bd3d5' => array('2.13', '543162'),
       'de61a738da273fbbdd198ade0f9b745f' => array('2.14', '551303'),
       '2fa981e9ef123c1b9da22135b21e6efd' => array('2.15', '611970'),
-      'c8ea8e8da87cb356ed9141e91df49250' => array('2.16', '632419'),
-      '32de3945300d5cc0ae08a4f3010d4921' => array('2.17', '685672')
+      'c8ea8e8da87cb356ed9141e91df49250' => array('2.16', '632419')
     );
     */
     $result = false;
@@ -1690,10 +1426,10 @@ class PosqlAdmin {
         <div>
           <h1>Error</h1>
           <p>
-            <strong>対象のファイルが読み込めません!</strong>
+            <strong>Cannot read the file!</strong>
           </p>
           <p>
-            <small>ファイル: <?php echo $this->escape($target); ?></small>
+            <small>file: <?php echo $this->escape($target); ?></small>
           </p>
         </div>
         <?php
@@ -1737,7 +1473,7 @@ class PosqlAdmin {
 
   function sendContentType(){
     if (!headers_sent()) {
-      header('Content-Type: text/html; charset=' . $this->charset);
+      header('Content-Type: text/html; charset:' . $this->charset);
     }
   }
 
@@ -1749,9 +1485,7 @@ class PosqlAdmin {
     <head>
     <meta http-equiv="content-type" content="text/html; charset=<?php
      echo $this->charset; ?>">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta name="robots" content="noindex,nofollow">
-    <title><?php echo $this->title; ?></title><?php 
+    <title><?php echo $this->title; ?></title><?php
      echo $css;
     ?></head>
     <body id="doc">
@@ -1779,7 +1513,7 @@ class PosqlAdmin {
         o = this;
       }
       if (o && c)
-        for (var p in c) 
+        for (var p in c)
           o[p] = c[p];
       return o;
     };
@@ -1953,7 +1687,7 @@ class PosqlAdmin {
           return {
             mx: mx,
             my: my,
-            x: x, 
+            x: x,
             y: y
           };
         }
@@ -2095,7 +1829,7 @@ class PosqlAdmin {
           };
           if (m == "POST")
             x.setRequestHeader(
-              "Content-Type", 
+              "Content-Type",
               "application/x-www-form-urlencoded"
             );
           x.send(a);
@@ -2157,14 +1891,14 @@ class PosqlAdmin {
 
   function displayMenu(){
     $menu = array(
-      'top'    => 'トップ',
+      'top'    => 'Top',
       'sql'    => 'SQL',
-      'manage' => '管理',
-      'import' => 'インポート',
-      'export' => 'エクスポート',
-      'config' => '設定',
-      'help'   => 'ヘルプ',
-      'logout' => 'ログアウト'
+      'manage' => 'Manage',
+      'import' => 'Import',
+      'export' => 'Export',
+      'config' => 'Config',
+      'help'   => 'Help',
+      'logout' => 'Logout'
     );
     $strong = 'top';
     foreach (array('a', 'm') as $action) {
@@ -2184,7 +1918,7 @@ class PosqlAdmin {
       <form action="<?php echo $this->script ?>" method="post">
         <input type="hidden" name="auth" value="<?php echo $this->isLogin; ?>">
         <fieldset>
-          <legend>メニュー</legend>
+          <legend>Menu</legend>
           <div><?php
           foreach($menu as $m => $s):
             printf('<a href="%s?a=menu'
@@ -2209,17 +1943,19 @@ class PosqlAdmin {
     ?>
     <div id="top">
       <fieldset>
-        <legend>トップ</legend>
+        <legend>Top</legend>
         <div>
-          <span>ようこそ！ <?php echo $this->className; ?> 管理ページへ</span>
+          <span>Welcome to the <?php
+                echo $this->className;
+                ?> management page!</span>
           <br>
           <span>id: <?php
-              echo $u ? $this->escape($u) 
-                      : '<span class="error">(id が未設定です)</span>';
+              echo $u ? $this->escape($u)
+                      : '<span class="error">(id is unsetting)</span>';
           ?></span><br>
           <p>
             <small>
-              <span>最終ログイン: <?php echo $this->lastLogin; ?></span>
+              <span>Last login: <?php echo $this->lastLogin; ?></span>
               <br>
               <span><?php echo $this->className; ?> Version: <?php
                           echo $this->getVersion(); ?></span>
@@ -2233,9 +1969,9 @@ class PosqlAdmin {
           <p>
             <small>
               <?php
-              $update_text = '最新にアップデート';
-              $update_title = '設定を引き継いだまま、&#x0A;'
-                       .  '新しいバージョンのPosqlAdminにアップデートします';
+              $update_text = 'Update PosqlAdmin';
+              $update_title = 'Updates PosqlAdmin for new version'
+                            . ' with the setting succeeded.';
               printf('<a href="%s?a=update_posqladmin'
                           . '&amp;auth=%s"'
                           . ' title="%s">'
@@ -2252,7 +1988,7 @@ class PosqlAdmin {
           <p>
             <small>
               <?php
-              $login_history = 'ログイン履歴';
+              $login_history = 'Login History';
               printf('<a href="%s?a=login_history'
                           . '&amp;auth=%s"'
                           . ' title="%s">'
@@ -2278,18 +2014,18 @@ class PosqlAdmin {
     ?>
     <div id="login_history">
       <fieldset>
-        <legend>ログイン履歴</legend>
+        <legend>Login History</legend>
         <div>
           <p>
             <small>
-              最大 <?php echo $this->escape($this->maxLoginHistory); ?>
-              件まで保存されます。
+              Maximum <?php echo $this->escape($this->maxLoginHistory); ?>
+              histories to stored.
             </small>
           </p>
           <?php
           if(empty($histories)):
             ?>
-            <p>履歴がありません</p>
+            <p>There is no login history.</p>
             <?php
           else:
             ?>
@@ -2297,14 +2033,13 @@ class PosqlAdmin {
               <tr>
                 <?php
                 $captions = array(
-                  0 => 'no',
-                  1 => 'id', 
-                  2 => 'date', 
-                  3 => 'service', 
-                  4 => 'type', 
-                  5 => 'result',
-                  6 => 'ip',
-                  7 => 'carrier'
+                  0 => 'id',
+                  1 => 'date',
+                  2 => 'service',
+                  3 => 'type',
+                  4 => 'result',
+                  5 => 'ip',
+                  6 => 'carrier'
                 );
                 foreach($captions as $caption):
                   ?>
@@ -2314,18 +2049,15 @@ class PosqlAdmin {
                 ?>
               </tr>
               <?php
-              $no = count($histories);
               while($history = array_pop($histories)):
                 echo '<tr>';
-                $item = array('no' => $no--);
-                $history = array_merge($item, $history);
                 foreach($history as $caption => $val):
                   $escaped = false;
                   switch($caption):
                     case 'id':
                         if ($val == null) {
                           $val = '<span class="error">'
-                               . '(id が未設定です)'
+                               . '(id is unsetting)'
                                . '</span>';
                           $escaped = true;
                         }
@@ -2337,10 +2069,10 @@ class PosqlAdmin {
                         $val = $this->getClass();
                         break;
                     case 'type':
-                        $val = 'ログイン';
+                        $val = 'login';
                         break;
                     case 'result':
-                        $val = $val ? '成功' : '失敗';
+                        $val = $val ? 'success' : 'failure';
                         break;
                     case 'ip':
                     case 'carrier':
@@ -2386,26 +2118,23 @@ class PosqlAdmin {
         <input type="hidden" name="a" value="update_posqladmin">
         <input type="hidden" name="m" value="upload_script">
         <fieldset>
-          <legend>最新にアップデート</legend>
+          <legend>Update PosqlAdmin</legend>
           <div>
             <p>
               <small>
-                設定を引き継いだまま、
-                <br>
-                新しいバージョンの PosqlAdmin にアップデートします。
+                Updates PosqlAdmin for new version with the setting succeeded.
               </small>
             </p>
             <p>
               <small>
-                アップデートする <strong>posqladmin.php</strong>
-                を指定してください。
+                Set &quot;<strong>posqladmin.php</strong>&quot; file.
               </small>
             </p>
             <p>
               <input type="file" name="update_posqladmin_upfile" size="50">
             </p>
             <p>
-              <input type="submit" value="OK" title="最新にアップデート">
+              <input type="submit" value="OK" title="Update PosqlAdmin">
             </p>
           </div>
         </fieldset>
@@ -2421,16 +2150,16 @@ class PosqlAdmin {
     $var = 'update_posqladmin_upfile';
     if (empty($_FILES[$var]['name'])
      || empty($_FILES[$var]['tmp_name'])) {
-      $error = 'アップロード失敗';
+      $error = 'Failed to uploads.';
     } else {
       $name     = $_FILES[$var]['name'];
       $tmp_name = $_FILES[$var]['tmp_name'];
       if (!is_uploaded_file($tmp_name)) {
-        $error = 'アップロード失敗';
+        $error = 'Failed to uploads.';
       } else {
         $fp = @fopen($tmp_name, 'rb');
         if (!$fp) {
-          $error = 'アップロードしたファイルが開けません';
+          $error = 'Cannot open the uploaded file.';
         } else {
           $buffer = '';
           while (!feof($fp)) {
@@ -2438,7 +2167,7 @@ class PosqlAdmin {
           }
           fclose($fp);
           if ($buffer == null) {
-            $error = 'ファイルが空です';
+            $error = 'Data seems to be empty.';
           } else {
             $points = array(
               '<?php',
@@ -2450,7 +2179,7 @@ class PosqlAdmin {
             );
             foreach ($points as $point) {
               if (strpos($buffer, $point) === false) {
-                $error = '不正なファイルです';
+                $error = 'Invalid script file.';
                 break;
               }
             }
@@ -2462,7 +2191,7 @@ class PosqlAdmin {
           if (!empty($old_data) && is_array($old_data)) {
             $fp = @fopen($this->db->fullPath($this->getScriptName()), 'r+b');
             if (!$fp) {
-              $error = 'ファイルが開けません';
+              $error = 'Cannot open the file.';
             } else {
               fwrite($fp, $buffer, strlen($buffer));
               fclose($fp);
@@ -2470,7 +2199,7 @@ class PosqlAdmin {
               $this->mem->E = trim($this->mem->E);
               $this->mem->init();
               if ($this->mem->o == 0) {
-                $error = '不正なファイルのようです';
+                $error = 'Invalid script file.';
               } else {
                 foreach ($old_data as $key => $val) {
                   $this->mem->saveAsPrivate($key, $val);
@@ -2500,14 +2229,15 @@ class PosqlAdmin {
           <input type="hidden" name="auth" value="<?php
             echo $this->isLogin ?>">
           <fieldset>
-            <legend>最新にアップデート結果</legend>
+            <legend>Update PosqlAdmin Result</legend>
             <div>
               <p class="success">
-                <strong>正常に処理が完了しました。</strong>
+                <strong>Completed the processing successfully. </strong>
               </p>
               <p>
                 <small>
-                  PosqlAdmin の設定を引き継ぎ アップデートできました。
+                  Updated PosqlAdmin for new version with
+                  the setting succeeded.
                 </small>
               </p>
               <p>
@@ -2538,8 +2268,8 @@ class PosqlAdmin {
       ?>
       <div>
         <p class="error">
-          データベース <?php echo $this->escape($target_file); ?>
-          が存在しません。
+          Database '<?php echo $this->escape($target_file); ?>'
+          does not exist.
         </p>
       </div>
       <?php
@@ -2558,22 +2288,21 @@ class PosqlAdmin {
           <input type="hidden" name="a" value="import">
           <input type="hidden" name="m" value="execute">
           <fieldset>
-            <legend>ローカルファイルからインポート</legend>
+            <legend>Import from local file</legend>
             <div>
               <p>
                 <small>
-                  ローカルの SQL ファイルから
-                  ダンプデータをインポートします。
+                  Import the SQL dump/file from local.
                 </small>
               </p>
               <p>
-                <small>アップロードサイズ上限: <?php
+                <small>Maximum upload size: <?php
                   echo $this->formatByte($maxsize);
                 ?></small>
               </p>
               <p>
                 <small>
-                  対象のデータベース: <?php
+                  Target database: <?php
                     echo $this->escape($target_file);
                   ?>
                 </small>
@@ -2582,7 +2311,7 @@ class PosqlAdmin {
                 <input type="file" name="import_upfile" size="50">
               </p>
               <p>
-                <input type="submit" value="UPLOAD" title="アップロード">
+                <input type="submit" value="UPLOAD" title="UPLOAD">
               </p>
             </div>
           </fieldset>
@@ -2600,16 +2329,16 @@ class PosqlAdmin {
     $var = 'import_upfile';
     if (empty($_FILES[$var]['name'])
      || empty($_FILES[$var]['tmp_name'])) {
-      $error = 'アップロード失敗';
+      $error = 'Failed to uploads.';
     } else {
       $name     = $_FILES[$var]['name'];
       $tmp_name = $_FILES[$var]['tmp_name'];
       if (!is_uploaded_file($tmp_name)) {
-        $error = 'アップロード失敗';
+        $error = 'Failed to uploads.';
       } else {
         $fp = @fopen($tmp_name, 'rb');
         if (!$fp) {
-          $error = 'アップロードしたファイルが開けません';
+          $error = 'Cannot open the uploaded file.';
         } else {
           $query = '';
           while (!feof($fp)) {
@@ -2621,7 +2350,7 @@ class PosqlAdmin {
       }
     }
     if ($query == null) {
-      $error = 'データが空のようです';
+      $error = 'Data seems to be empty.';
     }
     if ($error):
       ?>
@@ -2648,32 +2377,32 @@ class PosqlAdmin {
           <input type="hidden" name="a" value="sql">
           <input type="hidden" name="m" value="execute">
           <fieldset>
-            <legend>SQL を実行</legend>
+            <legend>Execute SQL</legend>
             <div>
               <p>
                 <small>
-                  データが正常に受け取れました。
+                  Success to got the data.
                   <br>
-                  実行するにはボタンを押してください。
+                  Push the button to execute.
                 </small>
               </p>
               <p>
                 <small>
-                  対象のデータベース: <?php
+                  Target database: <?php
                     echo $this->escape($target_file);
                   ?>
                 </small>
               </p>
               <div>
                 <div>
-                  <small>実行する SQL</small>
+                  <small>Executes SQL</small>
                 </div>
                 <textarea name="sql_query" rows="10" cols="80"><?php
                   echo $this->escape($query);
                 ?></textarea>
               </div>
               <div>
-                <input type="submit" value="OK" title="実行">
+                <input type="submit" value="OK" title="Execute">
                 <span id="import_cancel_area" style="margin-left:2px"></span>
               </div>
             </div>
@@ -2692,7 +2421,7 @@ class PosqlAdmin {
         var button = $().createElement("button");
         $.attr(button, {
           type: "button",
-          title: "キャンセル"
+          title: "CANCEL"
         });
         $.val(button, "CANCEL");
         button.innerHTML = "CANCEL";
@@ -2729,16 +2458,16 @@ class PosqlAdmin {
     if (!$this->db->isDatabase()) {
       $error = $this->db->lastError();
       $error.= sprintf('<div class="error">%s</div>',
-                        'データベースが変なようです。<br>'
-                      . '再度、登録しなおしてください。');
+                        'The database seems to be strange.<br>'
+                      . 'Please register again.');
     }
     $this->db->setPath($tmp);
     if (!$this->db->open($db)) {
-      $error .= '<p class="error">データベースが開けません!</p>';
+      $error .= '<p class="error">Cannot open the database!</p>';
     } else {
       $meta = $this->db->getMeta();
       if (!$meta) {
-        $error .= '<p class="error">テーブル情報が取得できません</p>';
+        $error .= '<p class="error">Cannot get the table information!</p>';
       }
     }
     if($error):
@@ -2754,11 +2483,11 @@ class PosqlAdmin {
             echo $this->escape($db);
           ?>">
           <fieldset>
-            <legend>データベースのダンプをエクスポート</legend>
+            <legend>Export the database dump</legend>
             <div>
               <p>
                 <small>
-                  <span>対象のデータベース:</span>
+                  <span>Target database:</span>
                   <span><?php
                     echo $this->escape(basename($db));
                     ?><small> (<?php
@@ -2773,7 +2502,7 @@ class PosqlAdmin {
                     <input type="checkbox" name="export_include_specials"<?php
                       echo $include_specials;
                     ?>>
-                    特殊カラム (rowid, ctime, utime) を含める
+                    Include special columns (rowid, ctime, utime)
                   </label>
                 </small>
               </p>
@@ -2783,13 +2512,13 @@ class PosqlAdmin {
                     <input type="checkbox" name="export_use_sql"<?php
                       echo $use_sql;
                     ?>>
-                    &quot;CREATE TABLE&quot; で定義したSQLを使う
+                    Use SQL defined on &quot;CREATE TABLE&quot;.
                   </label>
                 </small>
               </p>
               <p>
                 <small>
-                  <span>文字列のエスケープ:</span>
+                  <span>Escape types:</span>
                   <select name="export_dbtype">
                     <?php
                     foreach (array(
@@ -2814,14 +2543,14 @@ class PosqlAdmin {
               </p>
               <p>
                 <small>
-                  <span>データ型の補完:</span>
+                  <span>Supplementation with data type:</span>
                   <input type="text" name="export_default_type" value="<?php
                     echo $this->escape($default_type);
                   ?>">
                 </small>
               </p>
               <div>
-                <input type="submit" value="OK" title="OKですか?">
+                <input type="submit" value="OK" title="OK?">
               </div>
             </div>
           </fieldset>
@@ -2861,16 +2590,16 @@ class PosqlAdmin {
     if (!$this->db->isDatabase()) {
       $error = $this->db->lastError();
       $error.= sprintf('<div class="error">%s</div>',
-                        'データベースが変なようです。<br>'
-                      . '再度、登録しなおしてください。');
+                        'The database seems to be strange.<br>'
+                      . 'Please register again.');
     }
     $this->db->setPath($tmp);
     if (!$this->db->open($db)) {
-      $error .= '<p class="error">データベースが開けません!</p>';
+      $error .= '<p class="error">Cannot open the database!</p>';
     } else {
       $meta = $this->db->getMeta();
       if (!$meta) {
-        $error .= '<p class="error">テーブル情報が取得できません</p>';
+        $error .= '<p class="error">Cannot get the table information!</p>';
       }
     }
     $hr = '--------------------------------------------------------';
@@ -2879,7 +2608,6 @@ class PosqlAdmin {
     $dump = array();
     $header = array(
       sprintf('%s Version %s - SQL Dump',$this->getClass(),$this->getVersion()),
-      sprintf('Export date: %s', $this->now()),
       sprintf('%s Version: %s', $this->db->getClass(), $this->db->getVersion()),
       sprintf('%s Project: %s', $this->db->getClass(), $this->projectURL),
       sprintf($hr),
@@ -3015,15 +2743,15 @@ class PosqlAdmin {
             echo $this->escape($this->db->getDatabaseName() . '.sql');
           ?>">
           <fieldset>
-            <legend>データベースのダンプ結果</legend>
+            <legend>Dump result</legend>
             <div>
               <textarea name="target" class="dump-text"><?php
                 echo $this->escape($result);
               ?></textarea>
             </div>
             <div>
-              <input type="submit" value="Download" 
-                     title="ダンプ結果のSQLテキストをダウンロード">
+              <input type="submit" value="Download"
+                     title="Download SQL Text">
             </div>
           </fieldset>
         </form>
@@ -3055,10 +2783,10 @@ class PosqlAdmin {
     ?>
     <div id="managelist">
       <fieldset>
-        <legend>データベース管理下一覧</legend>
+        <legend>Database management list</legend>
           <div><?php
            if(empty($list)):?>
-            <p>登録されていません。</p><?php
+            <p>Unregistered.</p><?php
            else:?>
             <small>
             <ul><?php
@@ -3076,7 +2804,7 @@ class PosqlAdmin {
                              . '&amp;target=%s'
                              . '&amp;is_file=%d'
                              . '&amp;filename=%s" '
-                         . 'title="ダウンロード"%s>Download</a>',
+                         . 'title="Download"%s>Download</a>',
                   $this->script,
                   $this->isLogin,
                   urlencode($db),
@@ -3087,7 +2815,7 @@ class PosqlAdmin {
                 sprintf('<a href="%s?a=maintenance'
                              . '&amp;auth=%s'
                              . '&amp;target=%s" '
-                         . 'title="メンテナンス">メンテナンス</a>',
+                         . 'title="maintenance">Maintenance</a>',
                   $this->script,
                   $this->isLogin,
                   urlencode($db)
@@ -3105,7 +2833,7 @@ class PosqlAdmin {
 
   function displayManageSearch(){
     if (0 === strcasecmp(@get_class($this->db), 'Posql_Dummy_Object')) {
-      printf('<p>設定を先に済ませてください。</p>');
+      printf('<p>Please finish setting previously.</p>');
       return;
     }
     $dir = $this->getPost('managesearch_dir');
@@ -3144,11 +2872,11 @@ class PosqlAdmin {
         <input type="hidden" name="auth" value="<?php echo $this->isLogin;?>">
         <input type="hidden" name="a" value="managesearch">
         <fieldset>
-          <legend>データベース管理</legend>
+          <legend>Database management</legend>
           <div><?php
             if($result):
               ?><p>
-                 <small>選択したファイル: <strong><?php
+                 <small>Selected file: <strong><?php
                       echo $this->escape($result);
                     ?></strong>
                     <br>
@@ -3160,24 +2888,24 @@ class PosqlAdmin {
                         $this->script,
                         $this->isLogin,
                         urlencode($result)
-                      );?><big>このファイルを管理リストに追加する</big>
+                      );?><big>Add this file to the management list</big>
                         </a>
                     </div>
                  </small>
               </p><?php
             endif;
             ?><p>
-              <small>※ファイル形式は <strong><?php
+              <small>Available file format: <strong><?php
                 printf('%s (Version %s)',
                   $this->db->getClass(),
                   $this->db->getVersion()
                 );
-              ?></strong> のデータ形式のみ扱えます。
+              ?></strong>
               </small>
             </p>
             <div>
               <fieldset>
-                <legend><small>いまここ</small></legend>
+                <legend><small>Current directory</small></legend>
                 <div>
                   <p>
                     <strong><?php echo $this->escape($curpath); ?></strong>
@@ -3192,7 +2920,7 @@ class PosqlAdmin {
                           $this->isLogin,
                           urlencode($curpath)
                         );
-                      ?>">このディレクトリにデータベースを作成する</a>
+                      ?>">Create database to this directory</a>
                     </small>
                   </div>
                 </div>
@@ -3297,10 +3025,10 @@ class PosqlAdmin {
           printf('select_db_%s', $this->selectDBAction);
         ?>">
         <fieldset>
-          <legend>操作するデータベース選択</legend>
+          <legend>Select database</legend>
           <div><?php
             if(empty($dbs)):?>
-              <p>データベースが登録されていません。</p><?php
+              <p>Database is not registered.</p><?php
             else:?>
               <select name="select_db_path"><?php
               foreach ($options as $op):
@@ -3311,7 +3039,7 @@ class PosqlAdmin {
                 );
               endforeach;
               ?></select>
-              <input type="submit" name="m" value="OK" title="選択"><?php
+              <input type="submit" name="m" value="OK" title="Select"><?php
             endif;
           ?></div>
         </fieldset>
@@ -3326,19 +3054,19 @@ class PosqlAdmin {
     $file = $this->getPost('create_db_filename');
     $errors = array();
     if ($dir == null) {
-      $errors[] = '選択したパスが不正(empty)です';
+      $errors[] = 'Selected path is empty';
     } else if (!@is_dir($dir)) {
-      $errors[] = sprintf('選択したパス(%s)はディレクトリではありません',
+      $errors[] = sprintf('Selected path(%s) is not directory',
                           $this->escape($dir));
     } else {
       if (!(@fileperms($dir) & 2)) {
-        $errors[] = sprintf('選択したパス(%s)に書き込み属性'
-                         .  '(パーミッション)がありません',
+        $errors[] = sprintf('Selected path(%s)'
+                         .  ' has no writing attribute (permission).',
                             $this->escape($dir));
       }
       if (!(@fileperms($dir) & 4)) {
-        $errors[] = sprintf('選択したパス(%s)に読み込み属性'
-                         .  '(パーミッション)がありません',
+        $errors[] = sprintf('Selected path(%s)'
+                         .  ' has no reading attribute (permission).',
                             $this->escape($dir));
       }
     }
@@ -3356,7 +3084,7 @@ class PosqlAdmin {
           echo $this->escape($dir);
         ?>">
         <fieldset>
-          <legend>データベースを作成</legend>
+          <legend>Create database</legend>
           <div><?php
             if(!empty($errors)):
               foreach($errors as $error):
@@ -3366,20 +3094,21 @@ class PosqlAdmin {
               if($ext != null):?>
                 <p>
                   <small>
-                    ※ファイル名の後に拡張子「<strong><?php
-                      echo $this->escape($ext); ?></strong>」が付加されます。
+                    Note: Extension '<strong><?php
+                            echo $this->escape($ext);
+                          ?></strong>' is added after the filename.
                   </small>
                 </p>
                 <?php
               endif;
               ?>
               <p>
-                <small>作成するディレクトリ:</small>
+                <small>Directory to create:</small>
                 <br>
                 <strong><?php echo $this->escape($dir); ?>/</strong>
               </p>
               <p>
-                <small>作成するデータベース(ファイル)名:</small>
+                <small>Database(File) name:</small>
                 <br>
                 <span>
                   <input type="text" name="create_db_filename" value="<?php
@@ -3389,7 +3118,7 @@ class PosqlAdmin {
                 </span>
               </p>
               <p>
-                <input type="submit" value="OK" title="実行">
+                <input type="submit" value="OK" title="OK?">
               </p><?php
             endif;?>
           </div>
@@ -3401,7 +3130,7 @@ class PosqlAdmin {
                            '&amp;a=managesearch',
                            '&amp;m=search',
                            '&amp;managesearch_dir=%s">',
-                      '<small>戻る</small>',
+                      '<small>Back</small>',
                     '</a>',
                   '</p>'
                 )
@@ -3430,9 +3159,9 @@ class PosqlAdmin {
     $path = $this->cleanFilePath($path);
     $errors = array();
     if ($path == null || $file == null) {
-      $errors[] = 'ファイル名が不正(empty)です';
+      $errors[] = 'Filename is empty.';
     } else if (@file_exists($path)) {
-      $errors[] = sprintf('ファイル(%s)はすでに存在しています',
+      $errors[] = sprintf('File(%s) is already exists.',
                           $this->escape($path));
     } else {
       $this->db->open($path);
@@ -3465,7 +3194,7 @@ class PosqlAdmin {
       $dbs[] = $path;
       $this->mem->saveAsPrivate('manage.list', $dbs);
       $success = sprintf('<p class="success">'
-                      .  'データベース「%s」を作成しました'
+                      .  'Database(%s) was created'
                       .  '</p>', $this->escape($path));
     }
     $back_link = null;
@@ -3477,7 +3206,7 @@ class PosqlAdmin {
                      '&amp;a=managesearch',
                      '&amp;m=search',
                      '&amp;managesearch_dir=%s">',
-                '<small>戻る</small>',
+                '<small>Back</small>',
               '</a>',
             '</p>'
           )
@@ -3494,7 +3223,7 @@ class PosqlAdmin {
                      '&amp;a=create_db',
                      '&amp;create_db_filename=%s',
                      '&amp;create_db_dir=%s">',
-                '<small>戻る</small>',
+                '<small>Back</small>',
               '</a>',
             '</p>'
           )
@@ -3505,11 +3234,11 @@ class PosqlAdmin {
         urlencode($dir)
       );
     }
-    
+
     ?>
     <div id="create_db_result">
       <fieldset>
-        <legend>データベース作成の結果</legend>
+        <legend>Result of created database</legend>
         <div><?php
           if($error):
             echo $error;
@@ -3540,16 +3269,16 @@ class PosqlAdmin {
     if (!$this->db->isDatabase()) {
       $error = $this->db->lastError();
       $error.= sprintf('<div class="error">%s</div>',
-                        'データベースが変なようです。<br>'
-                      . '再度、登録しなおしてください。');
+                        'The database seems to be strange.<br>'
+                      . 'Please register again.');
     }
     $this->db->setPath($tmp);
     if (!$this->db->open($db)) {
-      $error .= '<p class="error">データベースが開けません!</p>';
+      $error .= '<p class="error">Cannot open the database!</p>';
     } else {
       $meta = $this->db->getMeta();
       if (!$meta) {
-        $error .= '<p class="error">テーブル情報が取得できません</p>';
+        $error .= '<p class="error">Cannot get the table information!</p>';
       } else {
         $meta = array_filter($meta);
         $this->db->setEngine($mode);
@@ -3562,36 +3291,35 @@ class PosqlAdmin {
         $mode = $this->db->getEngine();
       }
     }
-    $sql_histories = $this->mem->loadAsPrivate('sql_history');
-    if (!is_array($sql_histories)) {
-      $sql_histories = array();
-    }
     if($error):
       printf('<div class="error">%s</div>', $error);
     else:
      ?><div id="tableinfo">
         <fieldset>
-          <legend>データベース情報</legend>
-          <div><?
-          foreach($meta as $table_key => $cols):
+          <legend>Database information</legend>
+          <div><?php
+          foreach($meta as $table_key => $cols)
+		  { //:
             $table_name = $this->db->decodeKey($table_key);
             ?><div class="tableinfo-panel">
                  <fieldset>
                    <legend class="tableinfo-list"><?php
                      echo $this->escape($table_name);
                    ?></legend><div><ol start="0"><?php
-                   foreach($cols as $col_name => $default):
+                   foreach($cols as $col_name => $default)
+				   {//:
                      printf('<li><span class="columns">%s</span>'
                             .  ' <small>%s</small>'
                           . '</li>' . PHP_EOL,
                        $this->escape($col_name),
                        $this->plainValue($default, $col_name)
                      );
-                   endforeach;
+					 }
+                   //endforeach;
                    ?></ol></div>
                  </fieldset>
             </div><?php
-          endforeach;
+          }//endforeach;
           ?></div>
         </fieldset>
      </div>
@@ -3609,20 +3337,19 @@ class PosqlAdmin {
           <div>
             <div>
               <div>
-               <small>現在の評価モード:</small>
+               <small>Expression engine:</small>
                <small>
                  <strong><?php echo $this->escape($mode); ?></strong>
                </small>
               </div>
             </div>
             <div>
-              <textarea name="sql_query" id="sql_query" rows="7" cols="80"><?php
+              <textarea name="sql_query" rows="7" cols="80"><?php
                echo $this->escape( $this->getPost('from_import') ? '' : $sql);
                ?></textarea>
             </div>
             <div>
-              <input type="submit" value="OK" title="実行">
-              <span id="sql_history_panel"></span>
+              <input type="submit" value="OK" title="Execute">
             </div>
           </div>
         </fieldset>
@@ -3630,96 +3357,6 @@ class PosqlAdmin {
      </div>
      <script type="text/javascript">
      <!--
-     (function($){
-       var currentIndex = null;
-       var currentSQL = null;
-       var histories = <?php echo $this->encodeJSON($sql_histories);?>;
-       var panel = $("sql_history_panel");
-       if (panel && histories && histories.length) {
-         $.css(panel, {
-           marginLeft: "80px"
-         });
-         var space1 = $().createElement("span");
-         $.val(space1, "&nbsp;");
-         var space2 = space1.cloneNode(true);
-         var label = $().createElement("small");
-         $.val(label, "履歴:");
-         var prev = $().createElement("button");
-         $.attr(prev, {
-           type: "button"
-         });
-         $.css(prev, {
-           fontSize: "xx-small"
-         });
-         var next = prev.cloneNode(true);
-         prev.innerHTML = "&lt; PREV";
-         next.innerHTML = "NEXT &gt;";
-         $.attr(prev, {
-           title: "前のSQL履歴を表示"
-         });
-         $.attr(next, {
-           title: "次のSQL履歴を表示"
-         });
-         $.addEvent(prev, "click", function(ev) {
-           var editor = $("sql_query");
-           if (editor) {
-             if (currentIndex === null) {
-               currentSQL = $.val(editor);
-               currentIndex = histories.length;
-             }
-             currentIndex = Math.max(0, currentIndex - 1);
-             $.val(editor, histories[currentIndex]);
-             if (currentIndex <= 0) {
-               prev.disabled = true;
-             } else {
-               prev.disabled = false;
-             }
-             next.disabled = false;
-           }
-           try {
-             if (ev.preventDefault) {
-               ev.preventDefault();
-             } else {
-               ev.returnValue = false;
-             }
-           } catch (e) {}
-         });
-         $.addEvent(next, "click", function(ev) {
-           var editor = $("sql_query");
-           if (editor) {
-             if (currentIndex === null) {
-               currentSQL = $.val(editor);
-               currentIndex = histories.length;
-             }
-             currentIndex = Math.max(
-               0,
-               Math.min(histories.length, currentIndex + 1)
-             );
-             if (histories.length <= currentIndex) {
-               $.val(editor, currentSQL);
-               currentIndex = histories.length;
-               next.disabled = true;
-             } else {
-               $.val(editor, histories[currentIndex]);
-               next.disabled = false;
-             }
-             if (0 < currentIndex) {
-               prev.disabled = false;
-             }
-           }
-           try {
-             if (ev.preventDefault) {
-               ev.preventDefault();
-             } else {
-               ev.returnValue = false;
-             }
-           } catch (e) {}
-         });
-         $.each([label, space1, prev, space2, next], function(i, node){
-           panel.appendChild(node);
-         });
-       }
-     })(Posql);
      (function(){
        Posql.extend({
          joinNL: function(){
@@ -3843,7 +3480,7 @@ class PosqlAdmin {
       var e, t = $("tableinfo");
       if (t.hasChildNodes()) {
         t = t.firstChild;
-        do 
+        do
           if (t.tagName == "FIELDSET")
             break;
         while (t = t.nextSibling);
@@ -3904,25 +3541,14 @@ class PosqlAdmin {
     if ($db == null || $sql == null) {
       return;
     }
-    $sql_histories = $this->mem->loadAsPrivate('sql_history');
-    if (!is_array($sql_histories)) {
-      $sql_histories = array();
-    }
-    if (strlen($sql) < 1024) {
-      $sql_histories[] = $sql;
-      if (count($sql_histories) > 16) {
-        array_shift($sql_histories);
-      }
-      $this->mem->saveAsPrivate('sql_history', $sql_histories);
-    }
     $org_path = $this->db->path;
     $this->db->setPath($db);
     if (!$this->db->isDatabase()) {
       $error = $this->db->lastError();
       $error = $this->escape($error);
       $error.= sprintf('<div class="error">%s<br>%s</div>',
-                 'データベースが変なようです。',
-                 '再度、登録しなおしてください。'
+                 'The database seems to be strange.',
+                 'Please register again.'
       );
     } else {
       $start_time = $this->getMicrotime();
@@ -3953,7 +3579,7 @@ class PosqlAdmin {
                    '&amp;sql_select_db=%s',
                    '&amp;select_db_path=%s',
                    '&amp;a=sql',
-                   '&amp;sql_query=%s#sql">更新',
+                   '&amp;sql_query=%s#sql">Reload',
             '</a>',
           '</p>'
         )
@@ -3999,7 +3625,7 @@ class PosqlAdmin {
             <legend>SQL Result</legend>
             <div>
               <fieldset>
-                <legend><small>実行した SQL</small></legend>
+                <legend><small>Executed SQL</small></legend>
                 <div>
                   <div>
                     <textarea rows="7" cols="80" class="note"
@@ -4027,13 +3653,13 @@ class PosqlAdmin {
                   <p class="success">
                     <?php
                     echo $result;
-                    ?> の列に影響がありました。
+                    ?> rows affected.
                   </p>
                   <?php
                 else:
                   ?>
                   <p>
-                    <strong>結果:</strong>
+                    <strong>Result: </strong>
                     <span>
                       <?php
                       echo $this->plainValue($result);
@@ -4045,7 +3671,7 @@ class PosqlAdmin {
                 echo $reload_link;
               elseif(empty($result)):
                 ?>
-                <p>結果セットが空です。<p>
+                <p>Result set is empty.<p>
                 <?php
                 printf('<small>%s</small>', $this->db->lastError());
                 echo $reload_link;
@@ -4061,20 +3687,21 @@ class PosqlAdmin {
                 </p>
                 <p id="sql_editrows_note" style="display:none">
                   <small>
-                    列をダブルクリックすると編集できます。
+                    You can edit the row on double-click it
                     <small>(beta)</small>
                     <br>
-                    編集後 OK ボタンを押すと
-                    テキストエリアに SQL が挿入されます。
+                    When the OK button is pushed after it edits it,
+                    <br>
+                    SQL is inserted in the textarea.
                   </small>
                 </p>
                 <p id="sql_editrows_failed" style="display:none">
                   <small>
-                    結果の列が多いため直接編集できません。
+                    Cannot edit the rows directly.
                     <br>
-                    列が <?php
+                    The editable rows are maximum <?php
                       echo $this->maxEditRowsCount;
-                    ?> 以下の場合、直接編集できます。
+                    ?> Rows.
                   </small>
                 </p>
                 <table class="result">
@@ -4105,11 +3732,11 @@ class PosqlAdmin {
                                '<textarea class="row-col"'
                                      .  ' style="display:none">',
                                  $this->escape($col),
-                               '</textarea>', PHP_EOL,
+                               '</textarea>',
                                '<textarea class="row-data"'
                                      .  ' style="display:none">',
                                  $this->escape($rs_string),
-                               '</textarea>', PHP_EOL,
+                               '</textarea>',
                                '<div class="row-html">',
                                  $this->plainValue($rs, $col),
                                '</div>',
@@ -4142,6 +3769,7 @@ class PosqlAdmin {
       endif;
       ?>
     })(Posql);
+
     (function($){
       var getTable = function(){
         var ret = "";
@@ -4166,7 +3794,7 @@ class PosqlAdmin {
       var getChild = function(node, type){
         return $.getElementsByClass(type, node)[0];
       };
-      var rowCount = Number( $.trim( $.val( getChild(null, "row-num") ) ) );
+      var rowCount = $.trim( $.val( getChild(null, "row-num") ) );
       var maxEditRowsCount = Number("<?php echo $this->maxEditRowsCount; ?>");
       if (maxEditRowsCount < rowCount) {
         $.show( $("sql_editrows_failed") );
@@ -4190,7 +3818,7 @@ class PosqlAdmin {
           var ok = $().createElement("button");
           $.attr(ok, {
             type: "button",
-            title: "SQLを生成"
+            title: "Create SQL"
           });
           $.css(ok, {
             fontSize: "xx-small",
@@ -4205,7 +3833,7 @@ class PosqlAdmin {
           var cancel = $().createElement("button");
           $.attr(cancel, {
             type: "button",
-            title: "キャンセル"
+            title: "Cancel"
           });
           $.css(cancel, {
             fontSize: "xx-small",
@@ -4242,7 +3870,7 @@ class PosqlAdmin {
               ""
             ].join("\n");
             $.val( data, $.val( update ) );
-            $.val( html, $.escapeHTML( $.val( update ) ) );
+            $.val( html, $.val( update ) );
             $.toggle(edit);
             $.toggle(html);
             if (editor && typeof editor.value != "undefined") {
@@ -4272,7 +3900,7 @@ class PosqlAdmin {
             if (col) {
               var colName = $.trim( $.val(col) );
               if (colName != "rowid" &&
-                  colName != "ctime" && 
+                  colName != "ctime" &&
                   colName != "utime") {
                 if (edit.style.display == "none") {
                   $.val( update, $.val( data ) );
@@ -4298,7 +3926,7 @@ class PosqlAdmin {
     $title = '';
     switch ($m) {
       case 'vacuum':
-          $title = '最適化';
+          $title = 'Optimize';
           $result = false;
           if ($this->db->isDatabase($file) && $this->db->open($file)) {
             $database_before_size = @(filesize($this->db->getPath()));
@@ -4313,14 +3941,14 @@ class PosqlAdmin {
                 foreach ($opts as $i => $ret) {
                   switch ($ret) {
                     case $this->OPTIMIZE_DELETE:
-                        $reports[] = sprintf('Line %.0f: 削除しました', $i);
+                        $reports[] = sprintf('Line %.0f: deleted', $i);
                         break;
                     case $this->OPTIMIZE_REPAIR:
-                        $reports[] = sprintf('Line %.0f: 修復しました', $i);
+                        $reports[] = sprintf('Line %.0f: repaired', $i);
                         break;
                     case $this->OPTIMIZE_SKIP:
                     default:
-                        //$reports[] = sprintf('line %010u: スキップ', $i);
+                        //$reports[] = sprintf('line %010u: skipped', $i);
                         break;
                   }
                 }
@@ -4338,12 +3966,12 @@ class PosqlAdmin {
             if (is_array($reports)) {
               $reports = implode('', $reports);
             }
-            $reports .= sprintf('<div>データベースのサイズ:</div>'
+            $reports .= sprintf('<div>Size of database:</div>'
                              .  '<div>'
                               .  '<ul>'
-                               .  '<li>処理前: %u Bytes</li>'
-                               .  '<li>処理後: %u Bytes</li>'
-                               .  '<li> 差分 : %d Bytes</li>'
+                               .  '<li>Before: %u Bytes</li>'
+                               .  '<li>After : %u Bytes</li>'
+                               .  '<li> Diff : %d Bytes</li>'
                               .  '</ul>'
                              .  '</div>',
               $database_before_size,
@@ -4355,7 +3983,7 @@ class PosqlAdmin {
           }
           break;
       case 'unlock':
-          $title = '強制ロック解除';
+          $title = 'Unlock force';
           $result = false;
           if ($this->db->isDatabase($file)) {
             $this->db->_setTerminated(true);
@@ -4378,7 +4006,7 @@ class PosqlAdmin {
           }
           break;
       case 'clear_query_cache':
-          $title = 'クエリーキャッシュをクリア';
+          $title = 'Clear the query cache';
           $result = false;
           if ($this->db->isDatabase($file) && $this->db->open($file)) {
             if (method_exists($this->db, 'clearQueryCache')) {
@@ -4387,8 +4015,8 @@ class PosqlAdmin {
                 $result = true;
               }
               $reports = sprintf(
-                '<p><small><strong><big>%d</big></strong> '
-                 .  'のキャッシュを削除しました</small></p>',
+                '<p><small><strong><big>%d</big></strong>'
+                 .  ' caches were deleted</small></p>',
                 $clear_count
               );
             }
@@ -4401,31 +4029,31 @@ class PosqlAdmin {
     ?>
     <div id="maintenance">
       <fieldset>
-        <legend>データベースのメンテナンス</legend>
+        <legend>Maintenances database</legend>
           <div>
           <?php
           if(!@is_file($file)):
             ?>
             <p>
-              <small>対象のデータベースがありません</small>
+              <small>Database is not found.</small>
             </p>
             <p>
-              <small>ファイル: <?php echo $this->escape($file); ?></small>
+              <small>file: <?php echo $this->escape($file); ?></small>
             </p>
             <?php
           else:
+            printf('<p><strong>%s</strong></p>', $this->escape($title));
             if(is_bool($result)):
-              printf('<p><strong>%s</strong></p>', $this->escape($title));
               if($result):
                 ?>
                 <p class="success">
-                  正常に処理が完了しました。
+                  Success!
                 </p>
                 <?php
               else:
                 ?>
                 <p class="error">
-                  エラーが発生しました。
+                  Error!
                 </p>
                 <?php
                 if($this->db->isError()):
@@ -4445,13 +4073,16 @@ class PosqlAdmin {
             endif;
             ?>
             <p>
-              <small>データベース:</small>
+              <small>Database:</small>
               <br>
               <strong><?php echo $this->escape($file); ?></strong>
             </p>
             <p>
               <small>
-               <div>データベースの最適化や壊れた列の除去を行います。</div>
+               <div>
+                 Optimization of the database
+                 and a broken row are removed.
+               </div>
               </small>
             </p>
             <p>
@@ -4461,7 +4092,7 @@ class PosqlAdmin {
                                '&amp;a=maintenance',
                                '&amp;m=vacuum',
                                '&amp;target=%s">',
-                          '<small>最適化を実行</small>',
+                          '<small>Optimize</small>',
                         '</a>'
                   )
                 ),
@@ -4473,9 +4104,14 @@ class PosqlAdmin {
             </p>
             <p>
               <small>
-               <div>デッドロックを解消します。<div>
-               <div>※解除されていないままのロックを強制的に解除します</div>
-               <div>※アクセス中のプロセスがある場合は注意してください</div>
+               <div>Clear the dead-lock<div>
+               <div>
+                 The lock in the state of not being released is
+                 compulsorily released.
+               </div>
+               <div>
+                 Please note it when there is a process under the access.
+               </div>
               </small>
             </p>
             <p>
@@ -4485,7 +4121,7 @@ class PosqlAdmin {
                                '&amp;a=maintenance',
                                '&amp;m=unlock',
                                '&amp;target=%s">',
-                          '<small>強制ロック解除を実行</small>',
+                          '<small>Unlock force</small>',
                         '</a>'
                   )
                 ),
@@ -4497,8 +4133,8 @@ class PosqlAdmin {
             </p>
             <p>
               <small>
-               <div>クエリーキャッシュをクリアします。<div>
-               <div>※すべてのクエリーキャッシュが削除されます。</div>
+               <div>Clear the query cache<div>
+               <div>All query caches will be deleted.</div>
               </small>
             </p>
             <p>
@@ -4508,7 +4144,7 @@ class PosqlAdmin {
                                '&amp;a=maintenance',
                                '&amp;m=clear_query_cache',
                                '&amp;target=%s">',
-                          '<small>クエリーキャッシュのクリアを実行</small>',
+                          '<small>Clear the query cache</small>',
                         '</a>'
                   )
                 ),
@@ -4553,20 +4189,20 @@ class PosqlAdmin {
         <input type="hidden" name="auth" value="<?php echo $this->isLogin; ?>">
         <input type="hidden" name="a" value="config">
         <fieldset>
-          <legend>設定</legend>
+          <legend>Config</legend>
           <div class="config">
             <small>
               <fieldset>
-                <legend>Posql クラス ライブラリ パス</legend>
+                <legend>Posql class library path</legend>
                 <table>
                   <tr>
                     <td colspan="2" align="left">
                       <small>
-                        <strong>posql.php</strong> のファイルパスを設定
+                        Set the file path of <strong>posql.php</strong>
                       </small>
                       <br>
                       <small>
-                        ※最新でない場合エラーが発生するかもしれません。
+                        * Should be stable latest version.
                       </small>
                     </td>
                   </tr>
@@ -4579,11 +4215,11 @@ class PosqlAdmin {
                 </table>
               </fieldset>
               <fieldset>
-                <legend>アカウント</legend>
+                <legend>Account</legend>
                 <table>
                   <tr>
                     <td colspan="2" align="left">
-                      <small>ログイン時のアカウント情報を設定</small>
+                      <small>Set the account on Login.</small>
                     </td>
                   </tr>
                   <tr>
@@ -4611,10 +4247,10 @@ class PosqlAdmin {
                 <table>
                   <tr>
                     <td colspan="2" align="left">
-                      <small>SQL の評価エンジンを設定</small><br>
+                      <small>Set expression engine on SQL statement</small><br>
                       <small>
-                       ※評価エンジンの詳細は
-                         マニュアルを参照してください。
+                       * Refer to the manual
+                         (if you want details of expression engine).
                       </small>
                     </td>
                   </tr>
@@ -4642,8 +4278,8 @@ class PosqlAdmin {
                 <table>
                   <tr>
                     <td colspan="2" align="left">
-                      <small>マニュアルのファイルパスを設定</small><br>
-                      <small>※マニュアルは html 形式で 同梱されています。</small>
+                      <small>Set filename of manual.</small><br>
+                      <small>* Manuals are in package as HTML.</small>
                     </td>
                   </tr>
                   <tr>
@@ -4659,8 +4295,8 @@ class PosqlAdmin {
                 <table>
                   <tr>
                     <td colspan="2" align="left">
-                      <small>ダウンロードが失敗する場合の設定</small><br>
-                      <small>※別窓で開くと成功するかもしれません。</small>
+                      <small>Download helper.</small><br>
+                      <small>* Try opening as new window.</small>
                     </td>
                   </tr>
                   <tr>
@@ -4671,7 +4307,7 @@ class PosqlAdmin {
                             empty($dl) ? '' : ' checked="checked"'
                           );
                         ?>
-                        ダウンロードリンクを別窓で開く
+                        Open the download link as new window.
                       </label>
                     </td>
                   </tr>
@@ -4682,7 +4318,7 @@ class PosqlAdmin {
                 <table>
                   <tr>
                     <td colspan="2" align="left">
-                      <small>管理ページで使用するスタイルシートを設定</small>
+                      <small>Set Style Sheet used on the management page.</small>
                     </td>
                   </tr>
                   <tr>
@@ -4699,8 +4335,8 @@ class PosqlAdmin {
                   <tr>
                     <td colspan="2" align="left">
                       <small>
-                        <span>管理ページで使用する JavaScript を設定</span><br>
-                        <span>JavaScript は &lt;body&gt; の末尾に記述されます</span>
+                        <span>Set JavaScript used on the management page.</span><br>
+                        <span>JavaScript is put at the tail of &lt;body&gt;.</span>
                       </small>
                     </td>
                   </tr>
@@ -4714,7 +4350,7 @@ class PosqlAdmin {
               </fieldset>
             </small>
             <div>
-              <input type="submit" name="m" value="SAVE" title="保存">
+              <input type="submit" name="m" value="SAVE" title="SAVE">
             </div>
           </div>
         </fieldset>
@@ -4768,7 +4404,7 @@ class PosqlAdmin {
         fclose($fp);
       }
       if (!empty($links)) {
-        $top = array('top' => 'マニュアルトップ');
+        $top = array('top' => 'Manual Top');
         $links = array_merge($top, $links);
       }
       unset($file);
@@ -4776,7 +4412,7 @@ class PosqlAdmin {
     ?>
     <div id="help">
       <fieldset>
-        <legend>ヘルプ</legend>
+        <legend>Help</legend>
         <div><?php
          if($exists):?>
            <small><?php
@@ -4798,10 +4434,10 @@ class PosqlAdmin {
               ?>" width="99%" height="400" class="help-frame">
               <a href="<?php
                 echo $this->escape($help_path);
-                ?>">マニュアル</a>
+                ?>">Manual</a>
             </iframe><?php
          else:?>
-            ドキュメントがありません
+            There is no document.
             <?php
          endif;?>
         </div>
@@ -4819,7 +4455,7 @@ class PosqlAdmin {
         <input type="hidden" name="login_error_count" value="<?php
           echo $this->loginErrorCount; ?>">
         <fieldset>
-          <legend>ログイン</legend>
+          <legend>Login</legend>
           <div>
             <table>
               <tr>
@@ -4840,7 +4476,7 @@ class PosqlAdmin {
               </tr>
               <tr>
                 <td colspan="2" align="center">
-                  <input type="submit" name="m" value="LOGIN" title="ログイン">
+                  <input type="submit" name="m" value="LOGIN" title="Login">
                 </td>
               </tr>
             </table>
@@ -4923,7 +4559,6 @@ class PosqlAdmin {
  */
 function posql_admin_run(){
   $p = & new PosqlAdmin();
-  $p->init();
   $p->run();
   $p = null;
   unset($p);
@@ -4945,22 +4580,21 @@ class Posql_Dummy_Object {
   }
 }
 //-----------------------------------------------------------------------------
-// $Id: memo.php,v 0.15 2011/12/13 02:26:00 polygon Exp $
+// $Id: memo.php,v 0.14 2009/04/20 02:59:00 polygon Exp $
 class Memo{
 	var $m,$o,$B,$E,$N;
+	function Memo(){
+		$s='/';
+		$this->m=__FILE__;
+		$this->B=$s.'*@BEGIN';
+		$this->E='END@*'.$s;
+		$this->init();
+	}
 
 	function init(){
-		$p='/';
-		$this->m=__FILE__;
-		$this->B=$p.'*@BEGIN';
-		$this->E='END@*'.$p;
-		if(!(fileperms($this->m)&2)){
-			$a=@fopen($this->m,'a');
-			@fclose($a);
-			if(!$a)
-				die('There is no writing attribute in the permission of the file.
-						Must to enables the writing attribute (e.g. 666 (rw-rw-rw)).');
-		}
+		if(!(fileperms($this->m)&2))
+			die('There is no writing attribute in the permission of the file.
+					Must to enables the writing attribute (e.g. 666 (rw-rw-rw)).');
 		$f=$this->_fopen($this->o=0);
 		$i=1;
 		while(!feof($f)){
@@ -5096,10 +4730,8 @@ class Memo{
 }
 function &Memo(){
 	static $a;
-	if(!$a){
+	if(!$a)
 		$a=&new Memo;
-		$a->init();
-	}
 	return$a;
 }
 //-----------------------------------------------------------------------------
@@ -5111,4 +4743,10 @@ css|czoyODIyOiI8c3R5bGUgdHlwZT0idGV4dC9jc3MiPg0KPCEtLQ0KLyogYmFzaWNzICovDQoqICAg
 js|czoxNjQ6IjxzY3JpcHQgdHlwZT0idGV4dC9qYXZhc2NyaXB0Ij4NCjwhLS0NCihmdW5jdGlvbigpew0KIHRyeSB7DQogICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgibG9hZGluZyIpLnN0eWxlLmRpc3BsYXkgPSAibm9uZSI7DQogfSBjYXRjaCAoZSkge30NCn0pKCk7DQovLy0tPg0KPC9zY3JpcHQ+Ijs=
 dl|czowOiIiOw==
 posql|czoxMToiLi9wb3NxbC5waHAiOw==
+
+
+
+
+
 END@*/
+
