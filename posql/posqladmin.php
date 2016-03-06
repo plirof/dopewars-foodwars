@@ -4496,7 +4496,8 @@ class PosqlAdmin {
   function displayAuthError(){
     $this->sendContentType();
     if (!is_object($this->db)) {
-      $this->db = & new Posql_Dummy_Object;
+      //$this->db = & new Posql_Dummy_Object; //deprecated
+	  $this->db =  new Posql_Dummy_Object;
     }
     ?>
     <html>
@@ -4558,7 +4559,8 @@ class PosqlAdmin {
  * @return void
  */
 function posql_admin_run(){
-  $p = & new PosqlAdmin();
+  //$p = & new PosqlAdmin(); //deprecated
+  $p =  new PosqlAdmin();
   $p->run();
   $p = null;
   unset($p);
@@ -4731,7 +4733,8 @@ class Memo{
 function &Memo(){
 	static $a;
 	if(!$a)
-		$a=&new Memo;
+		//$a=&new Memo; //deprecated
+		$a=new Memo;
 	return$a;
 }
 //-----------------------------------------------------------------------------
