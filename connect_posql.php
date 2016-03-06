@@ -1,4 +1,5 @@
 <?php
+include "posql/posql.pack.php";
 
 $posql = new Posql("posql_dopewars_db.php");
   if ($posql->isError()) {
