@@ -69,56 +69,8 @@ define( "MAX_BITCHES",	25 );
 /////////////////////////////////////////////////////////////////////////////////
 // MYSQL CONNECT + SESSION START
 
-include("connect.php");
-//++++++++++++++++++++++++++++JON DEMO posql ++++++++++++++++++++++++++++++++
-/* 
-$posql = new Posql("posql_shoplist_db");
-  if ($posql->isError()) {
-    die($posql->lastError());
-  } 
-
-
-  $thequery="select * from ".$table_prefix."thelist order by purchased,priority asc";
-
-  $query_results = $posql->query($thequery); //= $posql->query($thequery);
-  while($row = $query_results->fetch()){
-  }
-  	if($posql->query("delete from ".$table_prefix."thelist where itemid='".(int)$_GET['itemid']."'")){
-		$output = '<b>Item deleted successfully!</b><br/><br/>';
-	}else{
-		$output = '<b>An Error Occurred: ' . $posql->lastError() . '</b><br><br>';
-	}
-
-	if(isset($_GET['itemid'])){
-	 
-		// if we're editing we need to grab the stuff from the database
-
-		// convert to integer (if its not a number it'll become zero
-		$itemid= (int)$_GET['itemid'];
-		$thequery="select * from ".$table_prefix."thelist where itemid='" . $itemid."'";
-		
-		if($debug) echo "<h1>thequery=$thequery</h1>";
-		//$query_results = mysql_query("select * from ".$table_prefix."thelist where itemid='" . $itemid . "' limit 1"); //orig line
-		$query_results = $posql->query($thequery);
-		if($debug) print_r($query_results);
-		$row = $query_results->fetch();
-		if($debug) print_r($row);
-	}else{
-		// set up blank array
-		$row['itemid'] = '';
-		$row['name'] = '';
-		$row['quantity'] = '';
-		$row['price_estimated']='';	
-		$row['category']='';		
-		$row['purchased'] = '';
-		$row['comment'] = '';
-		$row['priority'] = '';
-		$row['reoccuring'] = '';
-
-	}	
+include("connect_posql.php");
 	
-*/	
-//---------------------------------------	
 session_start();
 
 
@@ -157,8 +109,8 @@ if ( isset($_SESSION['uid']) )		$uid	= $_SESSION['uid'];
 
 /////////////////////////////////////////////////////////////////////////////////
 // UPDATING
-
-if ( 0 < mysql_result(mysql_query("SELECT COUNT(*) AS a FROM dopewars WHERE gameoff='1' LIMIT 1;"),0,'a') && !($_GET['action'] == "overnight" && $_GET['pwd'] == "aarde") )
+$query_count_gameoff="SELECT COUNT(*) AS a FROM dopewars WHERE gameoff='1' LIMIT 1;";
+if ( 0 < mysql_result($posql->query($query_count_gameoff),0,'a') && !($_GET['action'] == "overnight" && $_GET['pwd'] == "aarde") )
 {
 	die("Updating... Back in a sec!");
 }
@@ -171,7 +123,8 @@ if ( isset($_GET['action']) && "overnight" == $_GET['action'] && $_GET['pwd'] ==
 
 	// Opening all players
 	echo "Opening all players<br><br>".EOL.EOL;
-	$l = mysql_query("SELECT id,name,player FROM dopewars ORDER BY name ASC;") or die(mysql_error());
+	$query_select_pl_data="SELECT id,name,player FROM dopewars ORDER BY name ASC;";
+	$l = mysql_query($query_select_pl_data) or die(mysql_error());
 
 	// Alle spelers afgaan
 	while ($li = mysql_fetch_assoc($l))
@@ -183,6 +136,7 @@ if ( isset($_GET['action']) && "overnight" == $_GET['action'] && $_GET['pwd'] ==
 		// Player array inpakken
 		$npi = addslashes(serialize($pi));
 		// Updaten in MySQL
+	
 		$sql = "UPDATE dopewars SET player='$npi' WHERE id='".$li['id']."';";
 		mysql_query($sql) or die(mysql_error());
 		// OKAY message
