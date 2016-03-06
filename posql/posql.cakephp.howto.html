@@ -1,0 +1,477 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en" dir="ltr">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-script-type" content="text/javascript">
+<meta http-equiv="content-style-type" content="text/css">
+<link rel="Posql Project Page" lang="ja" href="http://sourceforge.jp/projects/posql/">
+<link rel="Posql Project Page" lang="en" href="http://sourceforge.net/projects/posql/">
+<link rel="Posql API Reference" href="posql.api.manual.html">
+<link rel="Posql Source Document" href="posql.src.manual.html">
+<link rel="Posql Develop Blog" href="http://polygon-blog.blogspot.com/">
+<link rel="Posql Index Catalog List" href="http://feel.happy.nu/doc/posql/">
+<link rel="author" title="polygon planet" href="http://feel.happy.nu/">
+<title>Use Posql with CakePHP - Posql - CakePHP HowTo</title>
+<style type="text/css" media="all">
+<!--
+/* basics */
+*         {font-family : verdana,sans-serif;
+           word-break  : keep-all;}
+html,
+body,td   {font-size   : 90%;
+           color       : #333366;
+           background  : #f8f8ff;}
+h1,h2,h3  {font-style  : normal;
+           font-weight : bold;
+           font-size   : 130%;}
+h2        {font-size   : 120%;}
+h3        {font-size   : 110%;}
+h1 a      {font-size   : 145%;
+           font-weight : bold;}
+p         {margin      : 10px;}
+hr        {border      : 1px dashed #333366;
+           width       : 98%;
+           height      : 1px;
+           border-width: 1px 0 0 0;}
+em        {font-style  : italic;
+           color       : #333;
+           background  : inherit;}
+dl,dt     {margin      : 2px;}
+dd        {margin      : 4px 6px 2px inherit;}
+dt        {font-weight : normal;}
+dt em     {font-weight : normal;}
+samp,
+code,
+pre,tt    {font-family : monospace;}
+samp      {color       : #333399;
+           background  : #fcfcff;}
+code      {color       : #333366;
+           background  : #fffffe;}
+pre       {border      : 1px solid #6666cc;
+           background  : #eeeeff;
+           color       : #333333;
+           padding     : 6px;
+           margin      : 6px;
+           font-family : monospace;}
+dfn       {background  : transparent;
+           color       : #330066;
+           padding     : 2px;
+           margin      : 2px;
+           font-weight : normal;
+           font-style  : normal;
+           font-family : verdana;}
+samp em,
+code em,
+pre em,
+dfn em    {font-size   : 85%;
+           background  : transparent;}
+dt dfn,
+dd dtn    {font-weight : bold;}
+
+/* anchors */
+a,
+a *       {color       : #3333ff;}
+a:link,
+a:visited,
+a:active  {text-decoration : underline;
+           color           : #336699;}
+a:link    {color           : #3333cc;}
+a:hover   {text-decoration : none;
+           color           : #0033ff;}
+
+/* classes */
+.footer   {text-align      : center;
+           color           : #666;}
+.rewind   {text-align      : right;
+           margin          : 4px;
+           font-size       : 80%;}
+.result   {border          : 2px solid #999;
+           background      : #fff;
+           empty-cells     : show;
+           border-collapse : collapse;
+           color           : #333;}
+.result,
+.result td    {text-align  : left;
+               border      : 2px solid #999;
+               padding     : 2px;
+               margin      : 1px;}
+.result .cols {background  : #eee;
+               color       : #333;
+               font-weight : bold;}
+.result .row  {background  : #fff;
+               color       : #333;
+               font-weight : normal;}
+.note         {border      : 1px solid #6666cc;
+               background  : #eeeeff;
+               color       : #333366;
+               padding     : 6px;
+               margin      : 4px;
+               font-weight : bold;
+               font-style  : normal;}
+.prose        {font-weight : normal;}
+.note .prose  {font-weight : normal;}
+.desc         {border      : 0 none;
+               background  : transparent;
+               margin      : 6px;}
+.nobr         {white-space : nowrap;}
+.tt           {font-family : monospace;}
+
+/* vars */
+var           {font-weight : normal;
+               font-style  : normal;
+               color       : #666;
+               background  : transparent;}
+var.unknown   {color       : #999999;}
+var.int       {color       : #330066;}
+var.bool      {color       : #000099;}
+var.string    {color       : #cc3300;}
+var.null      {color       : #666666;}
+var.float     {color       : #006600;}
+var.array     {color       : #0000cc;}
+var.object    {color       : #996600;}
+
+/* highlight */
+.htmldocs     {color       : #333366;}
+.strings,
+.heredocs     {color       : #cc3300;}
+.vars         {color       : #336699;}
+.comments     {color       : #6699ff;}
+.keywords     {color       : #0000ff;}
+.funcs        {color       : #000099;}
+
+/* other vars */
+var.string em,
+var.float em,
+var.int em    {font-size   : 85%;
+               color       : #999;}
+pre var,
+tt var,
+code var,
+samp var      {font-family : monospace;}
+var.var       {color       : #336699;}
+h2 a var      {font-size   : 120%;
+               font-weight : bold;
+               color       : #333;
+               background  : transparent;}
+-->
+</style>
+</head>
+<body id="doc">
+<script type="text/javascript">
+<!--
+/**
+ * Shows the loading message. Put this code before loading does complete.
+ * $Id: loading.pack.js,v 0.05 2009/08/26 07:31:05 polygon Exp $
+ */
+(function(){var A=window,d=document,e=d.documentElement,l=1,o="px",p="absolute",
+q="loading",r="STRONG",s="#fff",t="DIV",B="<",C=">",D=0,i="\v"=="v",n=parseInt,
+$=function(a,b){return b?B+a+C+b+B+"/"+a+C:/^[A-Z]+$/.test(a)?d.createElement(a
+):!/[A-Z]/.test(a)?d.getElementById(a):d.getElementsByTagName(a)[0]},g=$(t),j=
+$(t),k=$(r),m=function(){if(l){with(k.style)display=display=="none"?"":"none";
+setTimeout(m,512)}},u=function(a,b,c){b=a.addEventListener?a.addEventListener(b,
+c,0):a.attachEvent?a.attachEvent("on"+b,c):0},f,w,h,x,y,z,v;v=function(){if(!D){
+u(A,"load",function(){if(z.removeChild)z.removeChild($(q));l=0;A.scrollTo(l,l)})
+;D=1}z=$("Body");if(!z){if(++D<=30)setTimeout(v,10);return}f=d.body;w=(i?e.
+clientWidth||f.clientWidth||f.scrollWidth:innerWidth)||800;h=(i?e.clientHeight||
+f.clientHeight||f.scrollHeight:innerHeight)||600;x=n(w/2*0.86)+o;y=n(h/2*0.82)+
+o;with(g.style){position=p;left=0;top=0;width=w+o;height=h+o;backgroundColor=s;
+zIndex=998}with(j.style){position=p;left=x;top=y;color="#666";backgroundColor=s;
+zIndex=999;fontSize=20+o}g.id=q;j.innerHTML=$(r,"Loading..");k.appendChild(d.
+createTextNode("."));j.appendChild(k);g.appendChild(j);z.appendChild(g);u(A,
+"scroll",function(){g.style.top=f.scrollTop||A.pageYOffset||0});m()};v()})();
+//-->
+</script>
+
+<!--************************* TOP *************************-->
+<h1>
+ <a name="top">Use Posql with CakePHP</a>
+ <small> - Posql - CakePHP HowTo</small>
+</h1>
+<!--************************* NOTE **************************-->
+<div class="note">
+  This document is the one that most of sentences was translated literally into English from Japanese.
+  Therefore, please acknowledge it though there is a possibility with improper sentences.
+  <br>
+  You can refer
+  <a href="http://feel.happy.nu/doc/posql/posql.cakephp.howto.html">the original Japanese document</a>.
+</div>
+<!--************************* INDEX *************************-->
+<hr>
+<h2 id="index">Index</h2>
+<div>
+ <ul>
+  <li><a href="#overview">CakePHP Posql driver overview</a></li>
+  <li><a href="#confirmed_version">Confirmed version</a></li>
+  <li><a href="#download_posql">Download</a></li>
+  <li><a href="#howto_use">Install</a></li>
+  <li><a href="#bug_report">Bug report</a></li>
+  <li><a href="#related_link">Related links</a></li>
+ </ul>
+</div>
+<!--************************* OVERVIEW *************************-->
+<hr>
+<h2 id="overview">CakePHP Posql driver overview</h2>
+<p>
+ This document explains the procedure to use Posql as a database (DBO driver)
+  from CakePHP that is PHP framework.
+</p>
+<p>
+ Posql is database engine (DBMS) of pure PHP.
+ Refer to <a href="posql.sql.manual.html" title="Posql SQL Reference">Posql SQL Reference</a>
+  for a detailed outline and the supported SQL grammar if you want more informations.
+</p>
+<p>
+ From Posql Version 2.09.
+ DBO driver <dfn>'dbo_posql.php'</dfn> to be able to use Posql with CakePHP
+  and the configuration file etc are bundled to the package.
+</p>
+<p>
+ Posql current version is 2.17 stable.
+</p>
+<!--************************* REVISION *************************-->
+<hr>
+<h2 id="confirmed_version">Confirmed operating version</h2>
+<div>
+ <dl>
+  <dt>Posql Version</dt>
+  <dd>2.09 later (Current Stable Version: 2.17)</dd>
+  <dt>CakePHP Version</dt>
+  <dd>1.2.4 / 1.2.5 (1.2.x)</dd>
+  <dt>PHP Version</dt>
+  <dd>PHP 4.3+ / PHP 5</dd>
+ </dl>
+</div>
+<!--************************* DOWNLOAD *************************-->
+<hr>
+<h2 id="download_posql">Download</h2>
+<div>
+ <p>
+  Download Posql Version 2.17 (English)
+ </p>
+ <ul>
+  <li>
+   <p>
+    <a href="http://sourceforge.net/projects/posql/files/posql-2.17-en.zip/download">posql-2.17-en.zip</a>
+   </p>
+  </li>
+  <li>
+   <p>
+    <a href="http://sourceforge.net/projects/posql/files/posql-2.17-en.tar.gz/download">posql-2.17-en.tar.gz</a>
+   </p>
+  </li>
+ </ul>
+</div>
+<!--************************* HOW TO USE *************************-->
+<hr>
+<h2 id="howto_use">Install</h2>
+<div>
+ <ol>
+  <li>
+   <div>
+    <a href="#download_posql">Download</a> Posql Version 2.17 (If you have not yet).
+   </div>
+   <div>
+    <p>
+     There is a directory named <dfn>CakePHP-DBO-Posql</dfn>
+      in the Posql package, and it becomes target directory.
+     <br>
+     It becomes the following directory compositions.
+    </p>
+    <ul>
+     <li>
+      <p>
+       <dfn>CakePHP-DBO-Posql/cake/libs/model/datasources/dbo/dbo_posql.php</dfn>
+      </p>
+      <div>
+       The DBO driver Posql for the CakePHP framework.
+      </div>
+     </li>
+     <li>
+      <p>
+       <dfn>CakePHP-DBO-Posql/app/config/database.php.posql</dfn>
+      </p>
+      <div>
+       The database configuration file.
+      </div>
+     </li>
+     <li>
+      <p>
+       <dfn>CakePHP-DBO-Posql/app/vendors/posql/posql.php</dfn>
+      </p>
+      <div>
+       The main file of the Posql database class.
+      </div>
+      <div>
+       <br>
+      </div>
+     </li>
+    </ul>
+   </div>
+  </li>
+  <li>
+   <div>
+    Copy all the file directories (app and cake directory)
+     which exist in directory <dfn>CakePHP-DBO-Posql</dfn> in the Posql package
+     onto the right under directory of the main body of the CakePHP framework
+     (directory with app, cake, and vendors).
+   </div>
+   <p>
+     Note: The composition of the directory in <dfn>CakePHP-DBO-Posql</dfn> is the same as the CakePHP framework.
+   </p>
+   <p>
+    It becomes setting on the CakePHP framework side after this.
+   </p>
+  </li>
+  <li>
+   <div>
+    Delete all present cache if existed.
+   </div>
+  </li>
+  <li>
+   <div>
+    Set the file path of the database in the database configuration file.
+   </div>
+   <div>
+    This setting can be basically treated just like the SQLite DBO driver.
+   </div>
+   <div>
+    The database configuration file was sure to be copied onto
+    <p>
+     <dfn>app/config/database.php.posql</dfn>
+    </p>
+    Rename to original <dfn>'database.php'</dfn> a suitable filename and it to backup.
+    <br>
+    Rename <dfn>'database.php.posql'</dfn> to <dfn>'database.php'</dfn>.
+   </div>
+   <div>
+    <pre class="example">
+ var $default = array(
+   'driver'     =&gt; 'posql',
+   'persistent' =&gt; false,
+   'host'       =&gt; '',
+   'login'      =&gt; '',
+   'password'   =&gt; '',
+   'database'   =&gt; <var class="strings">'../vendors/posql/database_name.php'</var>,
+   'prefix'     =&gt; '',
+ ); </pre>
+   </div>
+   <div>
+    the state of default as feeling above.
+   </div>
+   <div>
+    Settings:
+    <p>
+     <var class="strings tt">'../vendors/posql/database_name.php'</var>
+    </p>
+    Look the part the key is <dfn>'database'</dfn>.
+    This becomes the file path of the database.
+    In default, it is set to the same directory as main class file <dfn>'posql.php'</dfn> by the relative path.
+    <br>
+    Change '<strong>database_name</strong>.php' which hits the database name to your suitable database name.
+    Change also the target directory if necessary.
+    Change to the absolute path from the relative path if possible.
+   </div>
+   <div>
+    Set the permissions of target directory to enables writing and enables reading.
+   </div>
+   <div>
+    Note:
+    There is a possibility that the database cannot be recognized
+     when <dfn>'.php'</dfn> of the extension is changed.
+   </div>
+   <div>
+    Even if the value is set, <dfn>'login'</dfn> and <dfn>'password'</dfn> are disregarded as well as SQLite.
+   </div>
+  </li>
+ </ol>
+</div>
+<!--************************* REPORT *************************-->
+<hr>
+<h2 id="bug_report">Bug report</h2>
+<p>
+ Only a minimum test is done though the Posql driver is taken to confirm the operation.
+ A complex SQL statement is not tested.
+ There is a trouble possibility when SQL sentence is originally issued.
+ Please try in consideration of the respect.
+</p>
+<p>
+ Post from the forum of
+  <a href="http://sourceforge.jp/projects/posql/" title="Posql project page">Posql Project Page</a>
+  or
+  post/comment from
+  <a href="http://polygon-blog.blogspot.com/" title="Posql develop Blog">Posql develop Blog (Japanese)</a>
+  , or
+  post from
+  <a href="http://feel.happy.nu/doc/posql/memo.php" title="debugging notepad by Posql">Posql Memo</a>
+  if there are a demand, an impression, trouble, and a bug report, etc.
+</p>
+<!--************************* OTHER Document *************************-->
+<hr>
+<h2 id="related_link">Related links</h2>
+<div>
+ <dl>
+  <dt><dfn>Posql</dfn></dt>
+  <dd>
+   <div>
+     <a href="http://sourceforge.jp/projects/posql/" title="Posql Project Page(ja)">
+      Posql Project (ja)
+     </a>
+   </div>
+   <div>
+     <a href="http://sourceforge.net/projects/posql/" title="Posql Project Page(en)">
+      Posql Project (en)
+     </a>
+   </div>
+   <div>
+    <ul>
+     <li>
+      <a href="posql.sql.manual.html" title="Posql SQL Reference">
+       Posql SQL Reference
+      </a>
+      <span> - Reference to supported SQL syntax by Posql</span>
+     </li>
+     <li>
+      <a href="posql.api.manual.html" title="Posql API Reference">
+       Posql API Reference
+      </a>
+      <span> - Reference to methods of class Posql as API</span>
+     </li>
+     <li>
+      <a href="posql.src.manual.html" title="Posql Source Document">
+       Posql Source Document
+      </a>
+      <span> - Source document generated from PHPDoc</span>
+     </li>
+    </ul>
+   </div>
+  </dd>
+  <dt><dfn>CakePHP</dfn></dt>
+  <dd>
+   <a href="http://www.cakephp.org" title="The official CakePHP website">
+    CakePHP: Rapid Development Framework
+   </a>
+  </dd>
+  <dt><dfn>PHP</dfn></dt>
+  <dd>
+   <a href="http://php.net" title="The official PHP website">
+    PHP: Hypertext Preprocessor
+   </a>
+  </dd>
+ </dl>
+</div>
+<!--************************* FOOTER *************************-->
+<hr>
+<p class="footer">
+ <a href="http://sourceforge.jp/projects/posql/" title="Posql Project Page">
+  Posql Project Page
+ </a>
+ <br>Last modified: 2010/03/28
+ <span>Written by</span>
+ <span>
+  <a href="http://feel.happy.nu/" title="website of author(Japanese)">polygon planet</a>
+ </span>
+</p>
+
+</body>
+</html>

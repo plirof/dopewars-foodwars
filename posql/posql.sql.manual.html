@@ -1,0 +1,1374 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en" dir="ltr">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-script-type" content="text/javascript">
+<meta http-equiv="content-style-type" content="text/css">
+<link rel="Posql Project Page" lang="ja" href="http://sourceforge.jp/projects/posql/">
+<link rel="Posql Project Page" lang="en" href="http://sourceforge.net/projects/posql/">
+<link rel="Posql API Reference" href="posql.api.manual.html">
+<link rel="Posql Source Document" href="posql.src.manual.html">
+<link rel="Posql Develop Blog" href="http://polygon-blog.blogspot.com/">
+<link rel="Posql Index Catalog List" href="http://feel.happy.nu/doc/posql/">
+<link rel="author" title="polygon planet" href="http://feel.happy.nu/">
+<title>Posql - Supported SQL Syntax - SQL Reference</title>
+<style type="text/css" media="all">
+<!--
+*         {font-family : verdana,sans-serif;}
+html,
+body      {font-size   : 90%;
+           color       : #333366;
+           background  : #f8f8ff;}
+h1,h2     {font-style  : normal;
+           font-weight : bold;
+           font-size   : 130%;
+           color       : #333;
+           background  : transparent;}
+h1 a      {font-size   : 145%;
+           font-weight : bold;}
+p         {word-break  : keep-all;
+           margin      : 10px;}
+hr        {border      : 1px dashed #333366;
+           width       : 98%;
+           height      : 1px;
+           border-width: 1px 0 0 0;}
+em        {font-style  : italic;
+           color       : #333;
+           background  : inherit;}
+dl,dt     {margin      : 2px;}
+dd        {margin      : 4px 6px 2px inherit;}
+dt        {font-weight : normal;}
+dt em     {font-weight : normal;}
+samp,
+code,
+pre       {font-family : monospace;}
+samp      {color       : #333399;
+           background  : #eeeeff;}
+pre       {border      : 1px solid #6666cc;
+           background  : #eeeeff;
+           color       : #333333;
+           padding     : 6px;
+           margin      : 4px;}
+dfn       {background  : transparent;
+           color       : #330066;
+           padding     : 2px;
+           margin      : 2px;
+           font-weight : normal;
+           font-style  : normal;
+           font-family : verdana;}
+dt dfn,
+dd dtn    {font-weight : bold;}
+
+a,
+a *       {color       : #3333ff;}
+a:link,
+a:visited,
+a:active  {text-decoration : underline;
+           color           : #336699;}
+a:link    {color           : #3333cc;}
+a:hover   {text-decoration : none;
+           color           : #0033ff;}
+
+.footer   {text-align      : center;
+           color           : #666;}
+.note     {border          : 1px solid #6666cc;
+           background      : #eeeeff;
+           color           : #333366;
+           padding         : 6px;
+           margin          : 4px;
+           font-weight     : bold;
+           font-style      : normal;}
+-->
+</style>
+</head>
+<body id="doc">
+
+<h1>
+  <a name="top">Posql - Supported SQL Syntax - SQL Reference</a>
+</h1>
+
+<div class="note">
+  This document is the one that most of sentences was translated literally into English from Japanese.
+  Therefore, please acknowledge it though there is a possibility with improper sentences.
+  <br>
+  You can refer
+  <a href="http://feel.happy.nu/doc/posql/posql.sql.manual.html">the original Japanese document</a>.
+</div>
+
+<h2 id="overview">Posql Overview</h2>
+<!--begin#overview-->
+<p>
+ Posql is the database class by pure PHP language it use only all-in-one file as the database.
+ It operates regardless of the version of PHP.
+ It is aimed to be able to handle more readily than SQLite.
+ Posql is a design which conforms to SQL-92.
+ PosqlAdmin (database manager) is included in the package which is able to operating the database with GUI.
+ You can be operated the Posql by using PEAR::DB or PEAR::MDB2, and CakePHP framework with DBO driver.
+ Posql implemented prepared-statements and bind mechanism that compatible with the PDO class.
+</p>
+<p>
+ The PHP syntax can be used for the expression (i.e. WHERE clause etc.). 
+ It is also possible to evaluate it by SQL syntax by using the function and the grammar of the SQL-92 standard.
+ The evaluation of the expression can switch by
+  the evaluation engine switch function according to the PHP mode, SQL mode, and that time.
+</p>
+<p>
+ Posql does not use the global space dirty so as not to collide with other libraries and frameworks and be designed.
+ Shall be defined only by a few individual classes, Posql* (Posql_Config, Posql_Utils, etc.) Defines a class of such.
+</p>
+<!--end#overview-->
+
+
+<p>
+ This document handles the <strong>SQL-engines-mode</strong>.
+</p>
+
+<p>
+ Posql understand basic SQL language.
+ However, a part of function is skipped or is handled as an error.
+ Which part of SQL language does Posql support or it explains whether to do in this document.
+</p>
+<p>
+ This document is not all of SQL grammar implemented with Posql.
+ If you want more documents,
+  see the the source code &quot;<em>posql.php</em>&quot; in class &quot;<em>Posql_Parser</em>&quot;.
+</p>
+<p>
+ Posql implements the following commands, or grammars.
+</p>
+
+<!--Begin#IndexPoint-->
+<ul id="index">
+ <li><em><a href="#comment">Comments</a></em></li>
+ <li><a href="#begin_transaction">BEGIN TRANSACTION</a></li>
+ <li><a href="#commit_transaction">COMMIT TRANSACTION</a></li>
+ <li><a href="#create_database">CREATE DATABASE</a></li>
+ <li><a href="#create_table">CREATE TABLE</a></li>
+ <li><a href="#delete">DELETE</a></li>
+ <li><a href="#describe">DESCRIBE</a></li>
+ <li><a href="#drop_database">DROP DATABASE</a></li>
+ <li><a href="#drop_table">DROP TABLE</a></li>
+ <li><em><a href="#type">Types</a></em></li>
+ <li><em><a href="#expr">Expression</a></em></li>
+ <li><em><a href="#function">Functions</a></em></li>
+ <li><a href="#insert">INSERT</a></li>
+ <li><a href="#rollback_transaction">ROLLBACK TRANSACTION</a></li>
+ <li><a href="#replace">REPLACE</a></li>
+ <li><a href="#select">SELECT</a></li>
+ <li><a href="#update">UPDATE</a></li>
+ <li><a href="#vacuum">VACUUM</a></li>
+ <li><em><a href="#keyword">Keywords</a></em></li>
+</ul>
+<!--End#IndexPoint-->
+
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="comment"><em>Comments</em></h2>
+<pre>
+  Comments ::= <var>SQL_Comment</var> | <var>PHP_Comment</var>
+
+  <var>SQL_Comment</var> ::= -- <var>single_line</var>
+
+  <var>PHP_Comment</var> ::= // <var>single_line</var> | # <var>single_line</var> | /* <var>multi_lines</var> */
+</pre>
+<p>
+ Comments are not SQL commands, SQL queries can be written in free.
+ When these are to be parsed is simply ignored.
+ Comments can contain text from anywhere can put a white space.
+</p>
+<p>
+ SQL comments are valid until the end.
+</p>
+<p>
+ Multiple-line comment may be something over the line.
+ New SQL statement is a multi-line comments start with the end point.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="begin_transaction">BEGIN TRANSACTION</h2>
+<pre>
+  SQL statement ::= { BEGIN | START } [TRANSACTION [<var>transaction_name</var>]]
+</pre>
+<p>
+ Posql supported the transaction with a rollback and an atomic committing from Version 2.09.
+ The transaction becomes either whether the processing of the data base between the blocks is
+ <strong>'Everything is executed'</strong> or <strong>'Nothing is executed'</strong>.
+</p>
+<p>
+ BEGIN command to initialize the transaction and start the block.
+ If BEGIN was executed,
+  the SQL statement will be process in a single transaction block
+  after an explicit
+  <a href="#commit_transaction">COMMIT</a> or
+  <a href="#rollback_transaction">ROLLBACK</a> to be executed.
+</p>
+<p>
+ For compatibility with <em>MySQL</em> BEGIN can be treated by the alias named START.
+</p>
+<p>
+ Optional <var>transaction_name</var> is ignored.
+ Posql (Version 2.17) does not support nested transactions in.
+ It is an error trying to start another transaction in the transaction.
+</p>
+<p>
+ <a href="#create_database">CREATE DATABASE</a>,
+ <a href="#drop_database">DROP DATABASE</a>
+ commands are exceptions, the transaction is not supported.
+</p>
+<p>
+ To execute multiple statements within a transaction block,
+ which helps to ensure consistency of data,
+ at the start and at the end of the transaction processing speed and a temporary impact on disk usage.
+</p>
+<p>
+ Posql (Version 2.17) never generate a temporary file.
+ It thoroughly makes, and processes a temporary backup area, the update,
+  and the deletion area in all one database (File) same as the transaction.
+ Therefore, influence in the transaction to the decrease at the processing speed etc. especially.
+</p>
+<p>
+ When the database is operated, appropriate lock processing (exclusive operation) is automatically done.
+ Unless there is a need for consistency, Posql on dealing with transaction does not need to do frequently.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="commit_transaction">COMMIT TRANSACTION</h2>
+<pre>
+  SQL statement ::= { COMMIT | END } [TRANSACTION [<var>transaction_name</var>]]
+</pre>
+<p>
+ COMMIT command, starting (<a href="#begin_transaction">BEGIN</a>) and commit the transaction.
+</p>
+<p>
+ Confirmed as a permanent process for all transactions made within the current block,
+  all databases are reflected in the actual process results and terminate the transaction.
+</p>
+<p>
+ Use <a href="#rollback_transaction">ROLLBACK</a> command to abort the transaction.
+ The transaction status is not started even if you issue a COMMIT particular problem, but an error occurs.
+</p>
+<p>
+ END command is alias for COMMIT.
+</p>
+<p>
+ More discussion about Posql transactions are described in the
+ <a href="#begin_transaction">BEGIN</a> section.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="create_database">CREATE DATABASE</h2>
+<pre>
+  SQL statement ::= CREATE DATABASE [IF NOT EXISTS] <var>database_name</var>
+
+  <var>database_name</var> ::= physical_file_path
+</pre>
+<p>
+ CREATE DATABASE command will create a new database.
+ The database will be generated physically as the one file.
+ Write permissions for the target directory (permissions)
+  If you do not have the connection timeout or an error may be.
+ File is generated as a database, their permissions are 666 (rw-rw-rw-) are set.
+ The database is written to the header information and meta information.
+</p>
+<p>
+ The error does not occur even when the database which tries to be made exists
+  when IF NOT EXISTS is put before the name of the database.
+ In this case, the return value only becomes imitation (FALSE) and it returns.
+</p>
+<p>
+ When the database is created,
+  Posql will try changing the extension of the database to "<em>.php</em>".
+ This provides a database security is addressed in the case of direct access.
+ The database is recommended to be put outside the document root of the server.
+ But, it might be impossible according to the environment.
+ In this case, it is desirable to adjust the extension to "<em>.php</em>".
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="create_table">CREATE TABLE</h2>
+<pre>
+  SQL statement ::= CREATE TABLE [IF NOT EXISTS] <var>table_name</var> (<var>column_definition</var> [, <var>column_definition</var>]*)
+
+  <var>column_definition</var> ::= <var>column_name</var> [<var>data_type</var>] [<var>column_constraint</var>]*
+
+  <var>data_type</var> ::= <var>type_name</var> | <var>type_name</var> ( <var>number</var> ) | <var>type_name</var> ( <var>number</var> , <var>number</var> )
+
+  <var>column_constraint</var> ::= PRIMARY KEY | DEFAULT <var>value</var>
+</pre>
+<p>
+ CREATE TABLE command creates a new table.
+ Basically, the keyword "<strong>CREATE TABLE</strong>" after the name of the new table,
+ and column definitions and constraints parentheses() are enclosed in follows.
+</p>
+<p>
+ IF NOT EXISTS can be given, even if the table already exists, you can prevent the occurrence of errors.
+</p>
+<p>
+ Definition of each column has a data type of the column after the column name,
+  followed by optional constraints.
+ But, <strong>Posql does not have any data type</strong>.
+ If you type, it is running PHP will be dependent on the type.
+ As pseudo-types, please refer <a href="#type">the Types section</a>.
+ Therefore, it is no limited and the data that is stored in any data type column by column is available.
+ No concept of maximum value.
+ All columns will be variable.
+</p>
+<p>
+ DEFAULT constraint specifies a default value when you insert data.
+ Default value, INSERT applies if the value of the column is omitted and the command executes.
+</p>
+<p>
+ PRIMARY KEY (primary key) can be specified as constraints in the first column.
+ Internally holds the <dfn>rowid</dfn> will be described below as a reference value.
+ PRIMARY KEY is a numeric type,
+  unless intentionally changed to
+  <em>auto increment</em>, <em>UNIQUEM</em> is treated as a constraint.
+</p>
+<p>
+ In a single INDEX, UNIQUE, CHECK and has not been implemented.
+ Instead Posql in the following three columns are one special.
+</p>
+<div>
+ <dl>
+  <dt><dfn>rowid</dfn></dt>
+  <dd>
+   Column holds a unique ID.
+   It is similar SQLite's <em>ROWID</em>.
+   <em>rowid</em> is always handled as a <em>primary key</em> and <em>auto increment</em>.
+  </dd>
+  <dt><dfn>ctime</dfn></dt>
+  <dd>
+   Maintains created time as the UNIX timestamp (PHP's time()).
+  </dd>
+  <dt><dfn>utime</dfn></dt>
+  <dd>
+   Maintains updated time as the UNIX timestamp (PHP's time()).
+   <em>utime</em> always updates the value at UNIX time of that time when the row is changed.
+  </dd>
+ </dl>
+</div>
+
+<p>
+ These special columns update when the record is changed or are added.
+ And, whenever the column of the same name (e.g. <em>rowid</em>) is generated,
+  the name space is overwrited on the Posql side.
+ These three special columns are added at the end of the column when the table is made.
+</p>
+<pre>
+ CREATE TABLE foo (
+  id    INTEGER      PRIMARY KEY,
+  name  VARCHAR(255) DEFAULT '',
+  addr  INT(11)      DEFAULT 0,
+  title TEXT
+);
+</pre>
+<p>
+ When it executes above SQL, the column of <em>foo</em> is:
+</p>
+
+<ol start="0" type="1">
+ <li>id</li>
+ <li>name</li>
+ <li>addr</li>
+ <li>title</li>
+ <li>rowid</li>
+ <li>ctime</li>
+ <li>utime</li>
+</ol>
+
+<p>
+ It is generated with such the order.
+ <br>
+ <em>id</em> works as a reference to rowid by specifying
+  PRIMARY KEY for the first column id.
+</p>
+<p>
+ The definition of the table can be referred to by using the <a href="#describe">DESCRIBE</a> command.
+</p>
+<p>
+ In a certain table, the number of columns and the number of restrictions are never limited without permission.
+ The size of the data which can be stored in a single line is about 2 GB by default.
+ This numerical value influence the maximum number of rows.
+ This value can be set by <em>setMax()</em> and <em>getMax()</em>.
+</p>
+<p>
+ The <a href="#drop_table">DROP TABLE</a> command is used to delete the table.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="delete">DELETE</h2>
+<pre>
+  SQL statement ::= DELETE FROM <var>table_name</var> [WHERE <var>expression</var>]
+</pre>
+<p>
+ DELETE command deletes the record from the table.
+ The format, &quot;<em>DELETE FROM</em>&quot; command followed
+  by the table name you want to delete a record.
+</p>
+<p>
+ If you omit the WHERE clause will delete all the rows of the table.
+ WHERE clause is specified, the expression is TRUE will be removed and only lines.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="describe">DESCRIBE</h2>
+<pre>
+  SQL statement ::= { DESCRIBE | DESC } [<var>table_name</var> | DATABASE]
+</pre>
+<p>
+ DESCRIBE command to get the informations from current database.
+</p>
+<p>
+ If table name is omitted, it will be get all the information of all tables.
+ The explicit meaning, instead of the abbreviated name of the table
+  after DESCRIBE can put the DATABASE.
+</p>
+<p>
+ The table name is specified, the result set column names of that table,
+ CREATE TABLE when SQL, DEFAULT constraint contains the value.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="drop_database">DROP DATABASE</h2>
+<pre>
+  SQL statement ::= DROP DATABASE [IF EXISTS] <var>database_name</var>
+
+  <var>database_name</var> ::= physical_file_path
+</pre>
+<p>
+ DROP DATABASE command physical deletes the database made by
+  the <a href="#create_database">CREATE DATABASE</a> command.
+ A physical deletion is to delete the database (File).
+ After DROP DATABASE is executed, it cannot be restored by Posql.
+</p>
+<p>
+ Even when the data base does not exist,
+  the error can be prevented from occurring by specifying IF EXISTS.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="drop_table">DROP TABLE</h2>
+<pre>
+  SQL statement ::= DROP TABLE [IF EXISTS] <var>table_name</var>
+</pre>
+<p>
+ The DROP TABLE command deletes the table made by
+  the <a href="#create_table">CREATE TABLE</a> command.
+ When DROP TALBE is executed,
+  meta information and all the table data of the data base are deleted physically and completely.
+</p>
+<p>
+ Even when the table of the object does not exist in specifying IF EXISTS,
+  the occurrence of the error can be controlled.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="type"><em>Types</em></h2>
+<pre>
+  <em>Types</em> ::= NULL | BOOLEAN | NUMBER | TEXT | BLOB
+</pre>
+<p>
+ This section explains <strong>pseudotype</strong>
+  that Posql handles in the expression and the function.
+ Even if the above-mentioned type is specified by
+  the <a href="#create_table">CREATE TABLE</a> command, it is ignored.
+ A part of expression might keep necessary though there is no type in Posql.
+ It is used by TYPEOF or CAST etc. functions.
+</p>
+<dl>
+ <dt><dfn>null</dfn></dt>
+ <dd> Value is NULL.</dd>
+ <dt><dfn>boolean</dfn></dt>
+ <dd> Value is TRUE or FALSE.</dd>
+ <dt><dfn>number</dfn></dt>
+ <dd> Value is numeric.</dd>
+ <dt><dfn>text</dfn></dt>
+ <dd> Value is textable or readable.</dd>
+ <dt><dfn>blob</dfn></dt>
+ <dd> Value is binary.</dd>
+</dl>
+<p>
+ These types are very vague.
+ In a certain specific value, when information as the type is needed, it might be useful.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="expr"><em>Expression</em></h2>
+<p>
+ this section explains the evaluation type (<em>expression</em>)
+  which does not explain a single command but becomes most other part commands.
+ All operators are included in the expression.
+ Though it describes even at the beginning, and this expression.
+ This document explain the execution engine of Posql becomes for
+ <strong>SQL-engines-mode</strong> to handle.
+</p>
+<p>
+ If execution type is <strong>PHP-engines-mode</strong>,
+  it depends on PHP operating everything.
+ It include the expression, the operator, and all functions.
+ Please refer to the
+ <a href="http://php.net/manual/language.operators.precedence" target="_blank" title="opens new window">PHP manual</a>
+ for details of the operator and the priority level that PHP recognizes
+  if you want more informations.
+</p>
+
+<pre>
+  <var>Expression</var> ::= <var>expression</var> <var>operator</var> <var>expression</var> |
+             <var>expression</var> <var>LIKE_operator</var> <var>expression</var> [ESCAPE <var>escape_string</var>] |
+             <var>operator</var> <var>expression</var> |
+             ( <var>expression</var> ) |
+             <var>column_name</var> |
+             <var>table_name</var> . <var>column_name</var> |
+             <var>function</var> ( <var>expression</var> [, <var>expression</var> ... ] | * ) |
+             <var>expression</var> ISNULL |
+             <var>expression</var> NOTNULL |
+             <var>expression</var> [NOT] BETWEEN <var>expression</var> AND <var>expression</var> |
+             <var>expression</var> [NOT] IN ( <var>expression</var> [, <var>expression</var> ... ] ) |
+             <var>expression</var> [NOT] IN ( SELECT <var>query</var> ) |
+             ( SELECT <var>query</var> ) |
+             CASE [<var>expression</var>] { WHEN <var>expression</var> THEN <var>expression</var> }+ [ELSE <var>expression</var>] END
+
+  <var>LIKE_operator</var> ::= LIKE | NOT LIKE
+</pre>
+<p>
+ The column name specifies either of the name defined by the
+  <a href="#create_table">CREATE TABLE</a> statement.
+</p>
+<p>
+ Posql understands the following operators.
+ The highest-precedence operators listed at the top.
+</p>
+<pre>
+  ()   ~
+  !    NOT
+  CASE, WHEN, THEN, ELSE, END
+  LIKE  IN  BETWEEN
+  *    /    %
+  MOD  DIV
+  +    -    ||
+  &lt;&lt;   &gt;&gt;
+  &lt;    &lt;=   &gt;=   &lt;&gt;
+  =    ==   !=   &lt;=&gt;  IS
+  &amp;    ^    |
+  AND  OR  XOR
+  ,
+</pre>
+
+<p>
+ Any value of Posql can handle a part of the expression.
+ In the arithmetic operation, &quot;numeric value&quot; is  handled as number.
+ There are an equal sign and two kinds of signs of inequality respectively.
+ <br>
+ The equal sign is expressed by = or == .
+ <br>
+ The sign of inequality is expressed by != or &lt;&gt; .
+ <br>
+ The &quot;|| operator&quot; is &quot;concatenation of string&quot;.
+ Right and left two character strings which are the operands are concatenated.
+ <br>
+ &quot;% operator&quot; calculates the remainder which divides the left side on the right side.
+</p>
+<p>
+ The CASE expression can be handled compatible to the SQL-92 standard.
+ The CASE expression returns one of the expressions the idea by evaluating a series of condition.
+ The CASE expression has two types below.
+ <br>
+ In the simple CASE expression,
+  one expression is compared with a series of simplicity expression and the result is decided.
+ <br>
+ The searched CASE expression allows for values to be replace in the result set based on comparison values.
+ <br>
+ Either types can use the ELSE argument (It is possible to omit it).
+ CASE can be used by an arbitrary statement and the clause which can use an effective.
+ For instance,
+  it is possible to use it by clauses such as the statements such as
+  SELECT, UPDATE, DELETE, and SET, select_list, WHERE, and HAVING.
+</p>
+<div>
+ <pre>
+  SELECT   ProductNumber,
+      CASE ProductLine
+          WHEN 'R' THEN 'Road'
+          WHEN 'M' THEN 'Mountain'
+          WHEN 'T' THEN 'Touring'
+          WHEN 'S' THEN 'School'
+          ELSE 'Not for sale'
+      END AS Category
+  FROM Product </pre>
+ <div>
+  The example above plainly changes
+   the result of the category of the product line by using the CASE expression.
+ </div>
+</div>
+<p>
+ In Version 2.17, the nest of CASE expression (Put the CASE in the CASE) is not supported.
+</p>
+<p>
+ LIKE operators are compared by the wild-card.
+ The pattern is specified for a right operand.
+ <br>
+ In LIKE, two wild-card characters of the following can be used in the pattern.
+</p>
+<dl>
+ <dt><dfn>%</dfn></dt>
+ <dd> Match the character of 0 characters or more.</dd>
+ <dt><dfn>_</dfn></dt>
+ <dd> Match clearly one arbitrary character.</dd>
+</dl>
+<p>
+ It gives priority to it in the escape character to make it
+  match to the literal of the wild-card character.
+ When the ESCAPE character is not specified,
+  the ESCAPE character is assumed to be backslash(\).
+</p>
+<dl>
+ <dt><dfn>\%</dfn></dt>
+ <dd> Match the percent character(%). </dd>
+ <dt><dfn>\_</dfn></dt>
+ <dd> Match the underscore(_).</dd>
+</dl>
+<p>
+ The ESCAPE argument is used to specify a different escape character.
+</p>
+<pre>
+ SELECT '100% OFF' LIKE '100|%_OF_' ESCAPE '|';
+</pre>
+<p>
+ The LIKE operator does not distinguish capital letters and small letters.
+</p>
+<p>
+ You can override an internal implementation of LIKE by using
+ <a href="posql.api.manual.html#create_function"
+    title="Posql API Reference #createFunction">Posql-&gt;createFunction() API</a>.
+</p>
+<!--Subqueries-->
+<p>
+ SELECT statements can appear in expressions as either the right-operand of the IN operator.
+ As a scalar quantity, or as the operand of an EXISTS, ANY, SOME and ALL operator.
+ As a scalar quantity or the operand of an IN operator,
+ the SELECT should have only a single column in its result-set.
+ <br>
+ SELECT with the EXISTS operator,
+ the columns in the result-set of the SELECT are ignored.
+ The expression returns TRUE if one or more rows exist.
+ Returns FALSE if the result set is empty.
+ <br>
+ If no terms in the SELECT expression refer to values in the containing query,
+ the expression is evaluated once prior to other processing.
+ <br>
+ If the SELECT expression does contain variables from the outer query,
+ then the SELECT is reevaluated every time it is needed.
+ <br>
+ When a SELECT is the right operand of the IN operator,
+ the IN operator returns TRUE if the SELECT result contains NULL
+ and if the left operand matches any of the values in the SELECT result.
+ When a SELECT appears within an expression but is not the right operand of an IN operator,
+ then the first row of the result of the SELECT becomes the value used in the expression.
+ If the SELECT yields more than one result row, all rows after the first are ignored.
+ If the SELECT yields no rows, then the value of the SELECT will be NULL.
+ Posql supports the nested sub-query.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="function"><em>Functions</em></h2>
+<p>
+ Though it described even at previous section,
+ This document explain the execution engine of Posql becomes for
+  <strong>SQL-engines-mode</strong> to handle.
+</p>
+<p>
+ If execution type is <strong>PHP-engines-mode</strong>,
+  it depends on PHP operating everything.
+ It include the expression, the operator, and all functions.
+ In the PHP mode, file I/O, output and a part of other programmed control functions
+  cannot be used by default.
+ This is a minimum validation for SQL statement.
+ Refer to <em>Posql-&gt;getDisableFunctions()</em>
+      and <em>Posql-&gt;setDisableFunctions()</em>
+  that in &quot;<a href="posql.api.manual.html#get_disable_functions"
+                   title="Posql API Reference">Posql API Reference #getDisableFunctions</a>&quot;
+  API manual bundled in package for details of these functions if you want more informations.
+</p>
+<p>
+ The following functions are available in default in Posql.
+ Moreover, there are a lot of functions
+  which make the function that modeled from SQLite implemented functions.
+ As for the function defined by SQL99, everything is almost implemented.
+</p>
+<p>
+ You can add, or override arbitrary function in the database engine
+  by using <em>Posql-&gt;createFunction()</em> API.
+ Refer to manual
+  &quot;<a href="posql.api.manual.html"
+           title="Posql API Reference">Posql API Reference</a>&quot;
+  that bundled to the package for details of API if you want more informations.
+</p>
+<p>
+ Posql supports Unicode in all functions.
+ The character string of the string function is handled as Unicode.
+ The character string is not a unit of the byte and is handled in one character.
+</p>
+<p>
+ The following functions that modeled from SQLite.
+</p>
+<dl>
+ <dt><dfn>abs</dfn>(X)</dt>
+ <dd>
+  Return the absolute value of the numeric argument X.
+ </dd>
+ <dt><dfn>coalesce</dfn>(X,Y,...)</dt>
+ <dd>
+  Return a copy of the first non-NULL argument.
+  If all arguments are NULL then NULL is returned.
+  There must be at least 2 arguments.
+ </dd>
+ <dt><dfn>hex</dfn>(X)</dt>
+ <dd>
+  The argument is interpreted as a BLOB.
+  The result is a hexadecimal rendering of the content of that blob.
+ </dd>
+ <dt><dfn>ifnull</dfn>(X,Y)</dt>
+ <dd>
+  Return a copy of the first non-NULL argument.
+  If both arguments are NULL then NULL is returned.
+  The ifnull() functions and coalesce() with two arguments are interchangeable.
+ </dd>
+ <dt><dfn>last_insert_rowid</dfn>()</dt>
+ <dd>
+  Return the <em>rowid</em> of the last row insert from this connection to the database.
+  This is the same value that would be returned from the
+   Posql-&gt;getLastInsertId() API method.
+ </dd>
+ <dt><dfn>length</dfn>(X)</dt>
+ <dd>
+  Return the string length of X in characters if X is a string, or in bytes if X is a blob.
+ </dd>
+ <dt><dfn>like</dfn>(X,Y,Z)</dt>
+ <dd>
+  This function is used to implement the &quot;Y LIKE X [ESCAPE Z]&quot; syntax of SQL.
+ </dd>
+ <dt><dfn>lower</dfn>(X)</dt>
+ <dd>
+  Return a copy of string X with all characters converted to lower case.
+  Also adjusts to multibyte string because it is handled as Unicode.
+ </dd>
+ <dt><dfn>ltrim</dfn>(X,Y)</dt>
+ <dd>
+  Return a string formed by removing any
+   and all characters that appear in Y from the left side of X.
+  If the Y argument is omitted, spaces are removed.
+ </dd>
+ <dt><dfn>max</dfn>(X,Y,...)</dt>
+ <dd>
+  Return the argument with the maximum value.
+  The argument can specify as string also.
+  This function is different from MAX() of the aggregate function.
+ </dd>
+ <dt><dfn>min</dfn>(X,Y,...)</dt>
+ <dd>
+  Return the argument with the minimum value.
+  The argument can specify as string also.
+  This function is different from MIN() of the aggregate function.
+ </dd>
+ <dt><dfn>nullif</dfn>(X,Y)</dt>
+ <dd>
+  Return the first argument if the arguments are different, otherwise return NULL.
+ </dd>
+ <dt><dfn>posql_version</dfn>()</dt>
+ <dd>
+  Return the version string for the Posql library that is running.
+  Example: &quot;2.17&quot;.
+ </dd>
+ <dt><dfn>random</dfn>(X,Y)</dt>
+ <dd>
+  Return the random numbers between -9999999999 and +9999999999 if the arguments were omitted.
+  Otherwise, return random numbers between X and Y, X as minimum value and Y as maximum value.
+ </dd>
+ <dt><dfn>replace</dfn>(X,Y,Z)</dt>
+ <dd>
+  Return a string formed by substituting string Z for every occurrence of string Y in string X.
+  The BINARY collating sequence is used for comparisons.
+  If Y is an empty string then return X unchanged.
+ </dd>
+ <dt><dfn>round</dfn>(X,Y)</dt>
+ <dd>
+  Round off the number X to Y digits to the right of the decimal point.
+  If the Y argument is omitted, 0 is assumed.
+ </dd>
+ <dt><dfn>rtrim</dfn>(X,Y)</dt>
+ <dd>
+  Return a string formed by removing any
+   and all characters that appear in Y from the right side of X.
+  If the Y argument is omitted, spaces are removed.
+ </dd>
+ <dt><dfn>soundex</dfn>(X)</dt>
+ <dd>
+  Compute the soundex encoding of the string X.
+  The string &quot;?000&quot; is returned if the argument is NULL.
+ </dd>
+ <dt><dfn>strftime</dfn>(format [, time])</dt>
+ <dd>
+  Return the formatted part of date from timestamp string
+  which includes conversion specifiers.
+  time will be current timestamp if the argument is NULL.
+  Refer
+  <a href="http://php.net/manual/function.strftime" target="_blank"
+     title="open in blanks window">PHP manual (strftime)</a>
+  if you want more informations about conversion specifiers.
+ </dd>
+ <dt><dfn>substr</dfn>(X,Y,Z)</dt>
+ <dd>
+  Return a substring of input string X that begins with the Y-th character and which is Z characters long.
+  If Z is omitted then all character through the end of the string are returned.
+  The left-most character of X is number 1.
+  If Y is negative the the first character of the substring is found
+   by counting from the right rather than the left.
+  If X is string then characters indices refer to actual Unicode characters.
+  If X is a BLOB then the indices refer to bytes.
+ </dd>
+ <dt><dfn>trim</dfn>(X,Y)</dt>
+ <dd>
+  Return a string formed by removing any and all characters that appear in Y from both ends of X.
+  If the Y argument is omitted, spaces are removed.
+ </dd>
+ <dt><dfn>typeof</dfn>(X)</dt>
+ <dd>
+  Return the datatype of the expression X.
+  Refer to <a href="#type">Types section</a> for the returned value.
+ </dd>
+ <dt><dfn>upper</dfn>(X)</dt>
+ <dd>
+  Return a copy of string X with all characters converted to upper case.
+  Also adjusts to multibyte string because it is handled as Unicode.
+ </dd>
+</dl>
+
+<p>
+ The following functions defined by SQL-99.
+</p>
+
+<dl>
+ <dt><dfn>bit_length</dfn>(value)</dt>
+ <dd>
+  Returns an integer value representing the number of bits in argument value.
+ </dd>
+ <dt><dfn>char_length</dfn>(value)</dt>
+ <dd>
+  Returns the string length of argument value in characters
+   if value is a string, or in bytes if value is a BLOB.
+ </dd>
+ <dt><dfn>extract</dfn>(datepart <dfn>FROM</dfn> expr)</dt>
+ <dd>
+  Allows the argument datepart to be extracted
+   (YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, TIMEZONE_HOUR, or TIMEZONE_MINUTE)
+   from argument expr.
+ </dd>
+ <dt><dfn>octet_length</dfn>(value)</dt>
+ <dd>
+  Returns an integer value representing the number of octets in value.
+ </dd>
+ <dt><dfn>position</dfn>(substring <dfn>IN</dfn> target_string)</dt>
+ <dt><dfn>position</dfn>(substring, target_string)</dt>
+ <dd>
+  Returns the position which starts in target_string by substring.
+  The position of the first character is 1.
+  Returns bytes if value is a BLOB.
+ </dd>
+ <dt><dfn>concatenate</dfn>(string1 || string2)</dt>
+ <dd>
+  Appends two or more literal expressions, column values, or variables together into one string.
+ </dd>
+ <dt><dfn>convert</dfn>(string <dfn>USING</dfn> charset [, source_charset])</dt>
+ <dt><dfn>convert</dfn>(string, charset, source_charset)</dt>
+ <dd>
+  Converts a string to a different representation within the same character set.
+
+  <pre>SELECT CONVERT('a&#xE4;e&#xEB;i&#xEF;' USING 'UTF-8');</pre>
+  The example above converts string 'a&#xE4;e&#xEB;i&#xEF;' into UTF-8.
+ </dd>
+ <dt><dfn>substring</dfn>(
+            string <dfn>FROM</dfn> position
+            [<dfn>FOR</dfn> length]
+            [<dfn>COLLATE</dfn> collation])
+ </dt>
+ <dt><dfn>substring</dfn>(string, position [, length [, collation]])</dt>
+ <dd>
+  A part of the character string is extracted.
+  The same operation as the above-mentioned substr() function is consequentially
+   done though the method of describing the grammar changes.
+  Collation is not supported in Posql Version 2.17.
+  Even if collation is specified, it is disregarded.
+
+  <pre>SELECT SUBSTRING('ABCDEFG', 3, 4);
+   -&gt; 'CDEF'</pre>
+
+  <pre>SELECT SUBSTRING('ABCDEFG', -5, 4);
+   -&gt; 'CDEF'</pre>
+  Two example above is a specification method to delimit by usual comma(,).
+
+  <pre>SELECT SUBSTRING('ABCDEFG' FROM 5 FOR 2);
+   -&gt; 'EF'</pre>
+  The example above is an example which uses the SQL99 grammar.
+ </dd>
+ <dt><dfn>translate</dfn>(string, from_chars <dfn>USING</dfn> to_chars)</dt>
+ <dt><dfn>translate</dfn>(string, from_chars, to_chars)</dt>
+ <dd>
+  Converts a string from one character set to another.
+  <pre>SELECT TRANSLATE('ABC123XYZ', 'ABC', 'DEF');
+   -&gt; 'DEF123XYZ'</pre>
+  The example above is a specification method to delimit by usual comma(,).
+
+  <pre>SELECT TRANSLATE('ABC123XYZ', '123' USING 'xyz');
+   -&gt; 'ABCxyzXYZ'</pre>
+  The example above is an example which uses like the SQL99 grammar.
+ </dd>
+ <dt><dfn>trim</dfn>(
+              [
+                [
+                  {  <dfn>LEADING</dfn>
+                   | <dfn>TRAILING</dfn>
+                   | <dfn>BOTH</dfn>
+                  }
+                ]
+                  { removal_string } <dfn>FROM</dfn>
+              ] target_string [<dfn>COLLATE</dfn> collation] )
+ </dt>
+ <dd>
+  Removes leading characters, trailing characters, or both from a character string.
+  As for the description which uses the SQL99 grammar
+   and the description delimited by comma(,), operation is different.
+  The same operation as the above-mentioned trim() function is
+   done when delimiting it by comma(,).
+  The character string is looked for and deleted when specifying it by the SQL99 grammar.
+  Collation is not supported in Posql Version 2.17.
+  Even if collation is specified, it is disregarded.
+  Some examples are below.
+
+  <pre>SELECT TRIM('  bar   ');
+   -&gt; 'bar'</pre>
+  The example above becomes the same operation as a usual trim() function,
+   and removes the white space before and behind the character string.
+
+  <pre>SELECT TRIM(LEADING 'x' FROM 'xxxbarxxx');
+   -&gt; 'barxxx'</pre>
+  The example above deletes 'x' from LEADING  (forward).
+
+  <pre>SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx');
+   -&gt; 'bar'</pre>
+  The example above deletes 'x' from BOTH.
+
+  <pre>SELECT TRIM(TRAILING 'xyz' FROM 'barxxyz');
+   -&gt; 'barx'</pre>
+  The example above deletes 'xyz' from TRAILING (rear side).
+ </dd>
+</dl>
+
+<p>
+ Other Functions
+</p>
+
+<dl>
+ <dt><dfn>cast</dfn>(expr <dfn>AS</dfn> type)</dt>
+ <dt><dfn>cast</dfn>(expr, type)</dt>
+ <dd>
+  Returns the value in which the type of argument expr is converted into argument type.
+  Refer to the <a href="#type">Types section</a> for available types in this function.
+ </dd>
+ <dt><dfn>concat</dfn>(...)</dt>
+ <dd>
+  Everything is connected as a character string and the one given by the argument is returned.
+  NULL is returned when there is NULL in the argument.
+ </dd>
+ <dt><dfn>now</dfn>( [time] )</dt>
+ <dd>
+  A present date is returned in the form of 'YYYY-MM-DD HH:MM:SS'.
+  When argument time is given by the numerical value,
+  The numerical value is considered to be Unix time and the date is returned.
+ </dd>
+ <dt><dfn>nvl</dfn>(expr1, expr2)</dt>
+ <dd>
+  Returns expr2 if expr1 is NULL.
+  Returns expr1 when expr1 is not NULL.
+  The function for compatibly with <em>Oracle</em>.
+ </dd>
+</dl>
+
+<p><br></p>
+<p><big><strong>Aggregate functions</strong></big></p>
+<p>
+ Posql supports the following aggregate functions.
+</p>
+
+<div>
+ <dl>
+  <dt><dfn>avg</dfn>(<em>X</em>)</dt>
+  <dd>Return the average value of all non-NULL <em>X</em> in group.</dd>
+  <dt><dfn>count</dfn>(<em>X</em>)</dt>
+  <dd>Return a count of the number of times that <em>X</em> is not NULL in a group.</dd>
+  <dt><dfn>count</dfn>(<strong>*</strong>)</dt>
+  <dd>Returns the total number of rows in the group.</dd>
+  <dt><dfn>max</dfn>(<em>X</em>)</dt>
+  <dd>Return the maximum value of all values in the group.</dd>
+  <dt><dfn>min</dfn>(<em>X</em>)</dt>
+  <dd>Return the minimum value of all values in the group.</dd>
+  <dt><dfn>sum</dfn>(<em>X</em>)</dt>
+  <dd>Return the numeric sum of all non-NULL values in the group.</dd>
+ </dl>
+</div>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="insert">INSERT</h2>
+<pre>
+  SQL statement ::= INSERT [OR <var>on_conflict_algorithm</var>] INTO <var>table_name</var> [(<var>column_name</var>[, <var>column_name</var> ...])] VALUES (<var>expression</var> [, <var>expression</var> ...]) |
+                    INSERT [OR <var>on_conflict_algorithm</var>] INTO <var>table_name</var> [(<var>column_name</var>[, <var>column_name</var> ...])] SELECT <var>query</var>
+
+  <var>on_conflict_algorithm</var> ::= REPLACE
+</pre>
+<p>
+ The INSERT command inserts a single, new row in the specified table.
+ It is supplemented in the order of the row of the column at
+  <a href="#create_table">CREATE TABLE</a> when the arrangement of the column is omitted.
+ It is necessary to agree to the number of columns for which the number of values is specified
+  when the arrangement of the column is specified.
+ When the column of the columns arrangement does not appear, the DEFAULT value will  be set.
+ When the DEFAULT value is not specified, NULL will be set.
+</p>
+<p>
+ The conflict algorithm can be specified after INSERT and OR.
+ Supported algorithm is REPLACE only, on Posql version 2.17 now.
+</p>
+<dl>
+ <dt><dfn>REPLACE</dfn>
+ <dd>
+  When a UNIQUE constraint violation occurs,
+  the pre-existing rows that are causing the constraint violation are removed prior to
+  inserting or updating the current row.
+  Thus the insert or update always occurs.
+  The command continues executing normally following REPLACE.
+ </dd>
+</dl>
+<p>
+ The example of INSERT is shown as follows.
+</p>
+<pre class="example">
+ INSERT INTO my_table (id, name, message) VALUES (1, 'foo', 'Hello');
+</pre>
+<p>
+ The second form of the INSERT statement takes its data from a SELECT statement.
+ A new entry is made in the table for every row of the SELECT result.
+ The SELECT sub-query able to handle simple statement or compound statements.
+</p>
+<pre class="example">
+ INSERT INTO my_table SELECT sub_id, sub_name, NULL FROM sub_table;
+</pre>
+
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="rollback_transaction">ROLLBACK TRANSACTION</h2>
+<pre>
+  SQL statement ::= ROLLBACK [TRANSACTION [<var>transaction_name</var>]]
+</pre>
+<p>
+ The ROLLBACK command returns the database to the state before it is begun for a present transaction.
+</p>
+<p>
+ ROLLBACK ends the transaction begun by <a href="#begin_transaction">BEGIN</a>,
+  and it backs rolling, all updates done in the transaction block are abandoned,
+  and the transaction will be end.
+</p>
+<p>
+ If the transaction to end with normally, use <a href="#commit_transaction">COMMIT</a> command.
+ The error occurs though there is no problem even if ROLLBACK is issued if the transaction is not begun.
+</p>
+<p>
+ A detailed explanation of transaction by Posql
+  is described in the <a href="#begin_transaction">BEGIN</a> section.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="replace">REPLACE</h2>
+<pre>
+  SQL statement ::= REPLACE INTO <var>table_name</var> [(<var>column_name</var>[, <var>column_name</var> ...])] VALUES (<var>expression</var> [, <var>expression</var> ...]) |
+                    REPLACE INTO <var>table_name</var> [(<var>column_name</var>[, <var>column_name</var> ...])] SELECT <var>query</var>
+</pre>
+<p>
+ The REPLACE command is an alias for the
+ <a href="#insert">&quot;INSERT OR REPLACE&quot;</a> variant of the INSERT command.
+ This alias is provided for compatibility other SQL database engines (e.g. <em>MySQL</em>).
+ See the <a href="#insert">INSERT</a> command documentation for additional information.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="select">SELECT</h2>
+<pre>
+  SQL statement ::= SELECT [ALL | DISTINCT] <var>select_list</var> [FROM <var>table_list</var>]
+                        [WHERE <var>expression</var>]
+                        [GROUP BY <var>expression</var> [, <var>expression</var> ...]]
+                        [HAVING <var>expression</var>]
+                        [<var>compound_operator</var> SELECT <var>query</var>]*
+                        [ORDER BY <var>sort_definition</var>]
+                        [LIMIT [<var>number</var> | ALL] [ { OFFSET | , } <var>number</var>]]
+
+  <var>select_list</var> ::= <var>result_column</var> [, <var>result_column</var>]*
+
+  <var>result_column</var> ::= * | <var>table_name</var> . * | <var>expression</var> [[AS] <var>alias_name</var>]
+
+  <var>table_list</var> ::= <var>table_name</var> [<var>join_operator</var> <var>table_name</var> <var>join_argument</var>]*
+
+  <var>table_name</var> ::= table_name [[AS] <var>alias_name</var>] |
+                (SELECT <var>query</var>) [[AS] <var>alias_name</var>]
+
+  <var>join_operator</var> ::= , | [NATURAL] [LEFT | RIGHT | FULL] [OUTER | INNER | CROSS] JOIN
+
+  <var>join_argument</var> ::= [ON <var>expression</var>] | [USING (<var>column_name</var> [, <var>column_name</var> ...])]
+
+  <var>sort_definition</var> ::= <var>column_name</var> [<var>sort_order</var>] [, <var>column_name</var> [<var>sort_order</var>]]*
+
+  <var>sort_order</var> ::= ASC | DESC
+
+  <var>compound_operator</var> ::= {UNION | INTERSECT | EXCEPT} [ALL]
+</pre>
+<p>
+ The SELECT statement is used to query the database.
+ The result of a SELECT is zero or more rows of data where each row has a fixed number of columns.
+ The number of columns in the result is specified
+  by the expression list in between the SELECT and FROM keywords.
+ Any arbitrary expression can be used as a result.
+ If a result expression is * then all columns of all tables are substituted for that one expression.
+ If the expression is the name of a table followed by .* then the result is all columns in that one table.
+</p>
+<p>
+ The DISTINCT keyword causes a subset of result rows to be returned,
+ in which each result row is different.
+ The default behavior is that all result rows be returned,
+ which can be made explicit with the keyword ALL.
+</p>
+<p>
+ The query is executed against one or more tables specified after the FROM keyword.
+ If multiple tables names are separated by commas,
+  then the query is against the CROSS JOIN of the various tables.
+ The full SQL-92 join syntax can also be used to specify joins.
+ A sub-query in parentheses may be substituted for any table name in the FROM clause.
+ The entire FROM clause may be omitted,
+  in which case the result is a single row consisting of the values of the expression list.
+</p>
+<p>
+ The WHERE clause can be used to limit the number of rows over which the query operates.
+</p>
+<p>
+ The GROUP BY clause causes one or more rows of the result to be combined into a single row of output.
+ This is especially useful when the result contains aggregate functions.
+ The HAVING clause is similar to WHERE except that HAVING applies after grouping has occurred.
+ The HAVING expression may refer to values, even aggregate functions, that are not in the result.
+</p>
+<p>
+ The ORDER BY clause causes the output rows to be sorted.
+ The argument to ORDER BY is a list of result columns that are used as the key for the sort.
+ ASC (ascending order) or DESC (descending order) can be specified by the option after the sorting type.
+</p>
+<p>
+ The LIMIT clause causes set the upper bound of the number of lines returned as a result-set.
+ When you specify number LIMIT of limits,
+  the line more than the specified number of lines is never returned
+  (Might be fewer than specification as a result of the inquiry).
+ <samp>LIMIT ALL</samp> is the same as the case to omit the LIMIT clause.
+ The optional OFFSET following LIMIT specifies how many rows
+  to skip at the beginning of the result set.
+ In a compound query, the LIMIT clause may only appear on the final SELECT statement.
+ The limit is applied to the entire query not to the individual SELECT statement to which it is attached.
+ Note that if the OFFSET keyword is used in the LIMIT clause,
+  then the limit is the first number and the offset is the second number.
+ If a comma is used instead of the OFFSET keyword,
+  then the offset is the first number and the limit is the second number.
+ This seeming contradition is intentional - it maximizes compatibility with popular SQL database systems.
+</p>
+<p>
+ A compound SELECT is formed from two or more simple SELECT connected by one of the operators
+ UNION, INTERSECT, or EXCEPT.
+ In a compound SELECT, all the constituent SELECT must specify the same number of result columns.
+ There may be only a single ORDER BY clause at the end of the compound SELECT.
+ The UNION operators combine the results of the SELECT to the right and left into a single table.
+ The difference is that in ommited ALL all result rows are distinct where in ALL there may be duplicates.
+ The INTERSECT operator takes the intersection of the results of the left and right SELECT.
+ EXCEPT takes the result of left SELECT after removing the results of the right SELECT.
+ When three or more SELECTs are connected into a compound, they group from left to right.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="update">UPDATE</h2>
+<pre>
+  SQL statement ::= UPDATE <var>table_name</var> SET <var>assignment_expression</var> [, <var>assignment_expression</var>]* [WHERE <var>expression</var>]
+
+  <var>assignment_expression</var> ::= <var>column_name</var> = <var>expression</var>
+</pre>
+<p>
+ The UPDATE statement is used to change the value of columns in selected rows of a table.
+ Each assignment in an UPDATE specifies a column name to the left of the equals sign (=)
+  and an arbitrary expression to the right.
+ The expressions may use the values of other columns.
+ All expressions are evaluated before any assignments are made.
+ A WHERE clause can be used to restrict which rows are updated.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="vacuum">VACUUM</h2>
+<pre>
+  SQL statement ::= VACUUM
+</pre>
+<p>
+ The VACUUM command is an enhanced feature in <em>SQLite</em>,
+  it implements to a similar command that modeled from <em>PostgreSQL</em>,
+  and the enhanced feature of Posql that modeled above.
+ If VACUUM is executed, the current database will be optimized physically.
+</p>
+<!-- ********************************************************************** -->
+<hr>
+<h2 id="keyword"><em>Keywords</em></h2>
+<p>
+ The following keywords are used by Posql.
+ Most keywords are SQL-92,
+  reserved words or it is listed assuming that it is possible to become a reserved word.
+ Posql is not reserving any keywords, but there is a possibility of colliding as an identifier.
+ Posql does not distinguish capital letters and small letters of the keywords.
+</p>
+<p class="keywords">
+ ALL
+ AND
+ ANY
+ AS
+ ASC
+ AUTO_INCREMENT
+ BEGIN
+ BETWEEN
+ BY
+ CASE
+ CHECK
+ COLLATE
+ COMMIT
+ CROSS
+ DATABASE
+ DEFAULT
+ DELETE
+ DESC
+ DESCRIBE
+ DISTINCT
+ DROP
+ ELSE
+ END
+ EXCEPT
+ EXISTS
+ FALSE
+ FOR
+ FOREIGN
+ FROM
+ FULL
+ GROUP
+ HAVING
+ IN
+ INDEX
+ INNER
+ INSERT
+ INTERSECT
+ INTO
+ IS
+ JOIN
+ KEY
+ LEFT
+ LIKE
+ LIMIT
+ NATURAL
+ NOT
+ NULL
+ OFFSET
+ ON
+ OR
+ ORDER
+ OUTER
+ PRIMARY
+ RIGHT
+ ROLLBACK
+ SELECT
+ SET
+ SOME
+ START
+ TABLE
+ TRANSACTION
+ TRUE
+ UNION
+ UNIQUE
+ UPDATE
+ USE
+ USING
+ VACUUM
+ VALUES
+ WHEN
+ WHERE
+ XOR
+</p>
+<p>
+ <strong>Special columns</strong>
+</p>
+<p class="keywords">
+ rowid
+ ctime
+ utime
+</p>
+<p>
+ <strong>Special words</strong>
+</p>
+<p class="keywords">
+ POSQL
+ POSQL_*
+</p>
+
+<!--************************* OTHER Document *************************-->
+
+<hr>
+<h2 id="other_document">Other documents and manuals</h2>
+
+<p>
+ The main documents and the manuals are included in the following links.
+</p>
+
+<div>
+ <ul>
+  <li>
+   <strong>
+    <a id="posql_api_reference" href="posql.api.manual.html" title="Posql API Reference">
+     Posql API Reference
+    </a>
+   </strong>
+   <span>
+    - Reference to methods of class Posql as API
+   </span>
+  </li>
+  <li>
+   <strong>
+    <a id="posql_source_document" href="posql.src.manual.html" title="Posql Source Document">
+     Posql Source Document
+    </a>
+   </strong>
+   <span>
+    - Source document generated from PHPDoc
+   </span>
+  </li>
+ </ul>
+</div>
+
+<!--************************* FOOTER *************************-->
+
+<hr>
+<p class="footer">
+ <a href="http://sourceforge.jp/projects/posql/" target="_blank" title="opens new window">
+  Posql Project Page
+ </a>
+ <br>Last modified: 2010/03/28
+ <span>Written by</span>
+ <span>
+  <a href="http://feel.happy.nu/" title="website of author(Japanese)">polygon planet</a>
+ </span>
+</p>
+
+</body>
+</html>
