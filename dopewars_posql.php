@@ -110,7 +110,10 @@ if ( isset($_SESSION['uid']) )		$uid	= $_SESSION['uid'];
 /////////////////////////////////////////////////////////////////////////////////
 // UPDATING
 $query_count_gameoff="SELECT COUNT(*) AS a FROM dopewars WHERE gameoff='1' LIMIT 1;";
-if ( 0 < mysql_result($posql->query($query_count_gameoff),0,'a') && !($_GET['action'] == "overnight" && $_GET['pwd'] == "aarde") )
+//if ( 0 < mysql_result($posql->query($query_count_gameoff),0,'a') && !($_GET['action'] == "overnight" && $_GET['pwd'] == "aarde") )
+$stmt_count_gameoff=$posql->query($query_count_gameoff);
+if ( 0 < ($stmt_count_gameoff->fetch() && !($_GET['action'] == "overnight" && $_GET['pwd'] == "aarde") ))
+
 {
 	die("Updating... Back in a sec!");
 }
@@ -220,10 +223,13 @@ if ( ( !isset($_SESSION['player']) || !isset($_SESSION['uid']) ) || isset($_GET[
 				else if ( 1 < strlen($name) && 1 < strlen($password) )
 				{
 					$_SESSION['language'] = $_POST['lang'];
-					$result = mysql_query("SELECT * FROM dopewars WHERE name='".$name."';");
+					$result=$posql->query("SELECT * FROM dopewars WHERE name='".$name."';");
+					
+					//$result = mysql_query("SELECT * FROM dopewars WHERE name='".$name."';");
 					if ( $new )
 					{
-						if (mysql_num_rows($result))
+					//if (mysql_num_rows($result))
+						if ($result->rowCount)
 						{
 							echo $error = "There already exists a user named \"$name\"!";
 						}
@@ -266,7 +272,8 @@ if ( ( !isset($_SESSION['player']) || !isset($_SESSION['uid']) ) || isset($_GET[
 					}
 					else
 					{
-						if ( !mysql_num_rows($result) )
+						//if ( !mysql_num_rows($result) )
+						if ( !$result->rowCount )
 						{
 							echo $error = "No such user";
 						}
