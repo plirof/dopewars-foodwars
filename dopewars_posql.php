@@ -145,7 +145,7 @@ if ( isset($_GET['action']) && "overnight" == $_GET['action'] && $_GET['pwd'] ==
 	
 		$sql = "UPDATE dopewars SET player='$npi' WHERE id='".$li['id']."';";
 		//mysql_query($sql) or die(mysql_error());
-		$posql->query($sql); 
+		$posql->query($sql)or die("Error - $sql"); 
 		// OKAY message
 		echo 'Player "'.$li['name'].'" updated...<br>'.EOL.EOL;
 	}
@@ -172,17 +172,23 @@ if ( isset($_GET['action']) && "hiscore" == $_GET['action'] )
 
 	echo "<p><b>Active dealers - Top 200</b></p>";
 	//$hq = mysql_query("SELECT name, score FROM dopewars ORDER BY score DESC LIMIT 200;") or die(mysql_error());
-	$hq = $posql->query("SELECT name, score FROM dopewars ORDER BY score DESC LIMIT 200;"); 
+	$hq = $posql->query("SELECT name, score FROM dopewars ORDER BY score DESC LIMIT 200;") or die("ERROR - SELECT name, score FROM dopewars ORDER BY score DESC LIMIT 200; "); 
 	$n=1;
-	while ($val = mysql_fetch_assoc($hq))
+	
+	//while ($val = mysql_fetch_assoc($hq))
+	while ($val = $hq->fetch('assoc'))
 	{
 			echo ($n++)." - ".htmlspecialchars($val['name']).' ($'.nummertje($val['score']).")<br>\n";
 	}
 
 	echo "<p><b>Legendary (dead) dealers - All-time-hi-scores - Top 100</p>";
-	$hq = mysql_query("SELECT name, score FROM dopescores ORDER BY score DESC LIMIT 100;") or die(mysql_error());
+	//$hq = mysql_query("SELECT name, score FROM dopescores ORDER BY score DESC LIMIT 100;") or die(mysql_error());
+	$hq = $posql->query("SELECT name, score FROM dopescores ORDER BY score DESC LIMIT 100;") or die("posql error!!!! line approx 184");
+	
 	$n=1;
-	while ($val = mysql_fetch_assoc($hq))
+	
+	//while ($val = mysql_fetch_assoc($hq))
+	while ($val = $hq->fetch('assoc'))
 	{
 			echo ($n++)." - ".htmlentities($val['name']).' ($'.nummertje($val['score']).")<br>\n";
 	}
@@ -244,6 +250,7 @@ if ( ( !isset($_SESSION['player']) || !isset($_SESSION['uid']) ) || isset($_GET[
 						}
 						else
 						{
+							//echo "AAAAAAAAAAAAAAAAA ok log in!"; //jon debug
 							check_max();
 							$player['name']				= $name;
 							$player['cash']				= 5000;
@@ -305,8 +312,11 @@ if ( ( !isset($_SESSION['player']) || !isset($_SESSION['uid']) ) || isset($_GET[
 							check_max( );
 							//session_register("uid");
 							//session_register("player");
-							$_SESSION['uid']	= mysql_result($result,0,'name');
-							$_SESSION['player']	= unserialize(mysql_result($result,0,'player'));
+							//$_SESSION['uid']	= mysql_result($result,0,'name');
+							$result_assoc=$result->fetch('assoc');
+							$_SESSION['uid']	=$result_assoc['name'][0]; 
+							//$_SESSION['player']	= unserialize(mysql_result($result,0,'player'));
+							$_SESSION['player']	= unserialize($result_assoc['player'][0]);
 							// if ( !isset($_SESSION['player']['life']) ) $_SESSION['player']['life'] = 100;
 							// echo "ingelogd...";
 							Header( "Location: " . BASEPAGE."?LOGGED_IN" );
@@ -406,7 +416,7 @@ else
 
 if ( !isset($_SESSION['player']) || !is_array($_SESSION['player']) )
 {
-	print_r( $_SESSION );
+	//print_r( $_SESSION ); //DEBUG
 	die("fout... <a href='?logout=1'>Index</a>");
 	// header("Location: ".BASEPAGE);
 	exit;
@@ -428,9 +438,11 @@ if ( isset($_GET['l']) && 0 <= $_GET['l'] && ( !isset($player['prison']) || !$pl
 	{
 		// at least 5 moves between fights with other players
 		$qry = "SELECT * FROM dopewars WHERE onthemove='1' LIMIT 1;";
-		$result = mysql_query($qry) or die(mysql_error());
+		//$result = mysql_query($qry) or die(mysql_error());
+		$result = $posql->query($qry) or die("error - line 439");
+		
 
-		if ( 0 < mysql_num_rows($result) && $uid != ($opponent_name=mysql_result($result,0,'name')) )
+		if (( 0 < $result->rowCount) && $uid != ($opponent_name=mysql_result($result,0,'name')) )
 		{
 			$opponent = mysql_fetch_assoc( $result );
 			// start fight with another player
@@ -2269,7 +2281,8 @@ function save_exit()
 	// print_r( $player );
 	$pl = addslashes(serialize($player));
 	$qry = "UPDATE dopewars SET player='".$pl."',onthemove='".$onthemove."',score='".$player['total']."',date=NOW() WHERE name='$uid';";
-	mysql_query($qry) or die("Error (0001): ".mysql_error());
+	//mysql_query($qry) or die("Error (0001): ".mysql_error());
+	$posql->query($qry) or die("Error (0001): line 2282 -query - $qry");
 
 	exit;
 }
@@ -2292,8 +2305,9 @@ function save_player( $uid, $player, $stopmoving = 0 )
 		$qry .= ",onthemove=FALSE";
 	}
 	$qry .= ",score=".$player['total']." where name='$uid'";
-	mysql_query($qry) or die("Error (0002): ".mysql_error());
-	echo (!mysql_affected_rows()) ? "NIET UITGEVOERD - Save_Player()" : "";
+	//mysql_query($qry) or die("Error (0002): ".mysql_error());
+	$posql->query($qry) or die("Error (0002): -$qry");
+	echo (!mysql_affected_rows()) ? "NIET UITGEVOERD - Save_Player()" : ""; //#############
 }
 
 function check_life( $line = 0 )
@@ -2312,10 +2326,12 @@ function check_life( $line = 0 )
 	{
 		report_snitches( );
 		$qry = "INSERT INTO dopescores (name, password, score) values ('".$player['name']."', '$pass', '".$player['total']."');";
-		mysql_query($qry) or die("Error (0003): ".mysql_error());
+		//mysql_query($qry) or die("Error (0003): ".mysql_error());
+		$posql->query($qry) or die("Error (0003): $qry");
 		unset($_SESSION[player]);
 		$qry = "DELETE FROM dopewars WHERE name='$uid';";
-		mysql_query($qry) or die("Error (0004): ".mysql_error());
+		//mysql_query($qry) or die("Error (0004): ".mysql_error());
+		$posql->query($qry) or die("Error (0004): $qry");
 		echo "<br>". $str[dead];
 		echo "<p><a href=\"?logout=1\">new game</a>";
 		echo "</body></html>";
@@ -2326,10 +2342,12 @@ function check_life( $line = 0 )
 function dealer_list()
 {
 	$qry = "SELECT id,name FROM dopewars ORDER BY name ASC;";
-	$r = mysql_query($qry);
+	//$r = mysql_query($qry);
+	$r = $posql->query($qry);
 	echo "<select name=dealer>";
 	echo "<option value=''>-select";
-	while ($val = mysql_fetch_assoc($r))
+	//while ($val = mysql_fetch_assoc($r))
+	while ($val = $r->fetch('assoc') )
 	{
 		echo "<option value='".$val['id']."'>".htmlentities($val['name'])."\n";
 	}
@@ -2339,6 +2357,7 @@ function dealer_list()
 function report_snitches( )
 {
 	global $db, $uid, $player, $str;
+	//global $posql;
 
 	if ( !isset($player['currentsnitches']) || !is_array($player['currentsnitches']) )	$player['currentsnitches'] = Array( );
 
@@ -2352,8 +2371,13 @@ function report_snitches( )
 
 	$qry = implode("','", array_unique($player['currentsnitches']));
 	$qry = "SELECT * FROM dopewars WHERE name in ('$qry')";
-	$results = mysql_query($qry);
-	while ($result = mysql_fetch_assoc($results))
+	//$results = mysql_query($qry);
+	$results = $posql->query($sql);
+	//#################################
+	
+	//while ($result = mysql_fetch_assoc($results))
+	while ($result=$results->fetch('assoc'))
+	
 	{	
 		$subject = unserialize(stripslashes($result['player']));
 		$subject['snitchreport'][] = $player['fightreport'];
